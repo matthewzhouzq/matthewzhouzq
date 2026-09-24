@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { carpetMaps, wallMaps, nightTexture } from './textures'
+import { carpetMaps, wallMaps } from './textures'
+import Skyline from './Skyline'
 import { Foliage } from './Plant'
 import { PALETTE } from '../data'
 
@@ -61,13 +62,10 @@ function Shelf({ position }) {
 }
 
 function Window() {
-  // tall window on the left wall: faint cold night light
+  // tall window on the left wall, looking out over the Plateau at night
   return (
-    <group position={[LEFT_X + 0.01, 1.55, 0.3]} rotation={[0, Math.PI / 2, 0]}>
-      <mesh>
-        <planeGeometry args={[1.1, 1.9]} />
-        <meshBasicMaterial map={nightTexture()} toneMapped={false} />
-      </mesh>
+    <group position={[LEFT_X + 0.01, 1.4, -0.35]} rotation={[0, Math.PI / 2, 0]}>
+      <Skyline width={1.1} height={1.9} />
       {/* mullions + frame */}
       {[[0, 0, 0.03, 1.9], [0, 0.2, 1.1, 0.03], [0, -0.95, 1.2, 0.06], [0, 0.95, 1.2, 0.06], [-0.56, 0, 0.06, 1.95], [0.56, 0, 0.06, 1.95]].map(([x, y, w, h], i) => (
         <mesh key={i} position={[x, y, 0.02]}>
