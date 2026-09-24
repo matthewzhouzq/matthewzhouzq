@@ -290,3 +290,6 @@ a { color: inherit; text-decoration: none; }
   .slide-body { padding: 18px 4px 4px; }
   .slide-body h2 { font-size: 34px; }
 }
+
+/* entry screen: everything lowercase */
+.loader .eyebrow, .enter { text-transform: none; }
