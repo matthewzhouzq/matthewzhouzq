@@ -1,7 +1,7 @@
 import { Suspense, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Environment, Lightformer, Sparkles } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette, Noise, Outline, Selection, ToneMapping } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Vignette, Noise, Outline, Selection, ToneMapping, N8AO, SMAA } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import * as THREE from 'three'
 
@@ -29,13 +29,13 @@ function Lights() {
   const intro = useIntroClock()
   useFrame(() => {
     const k = THREE.MathUtils.smoothstep(intro.current, 0, 2.2)
-    moon.current.intensity = 0.6 * k
-    wash.current.intensity = 38 * k
-    amb.current.intensity = 0.5 * k
+    moon.current.intensity = 0.45 * k
+    wash.current.intensity = 14 * k
+    amb.current.intensity = 0.14 * k
   })
   return (
     <>
-      <hemisphereLight ref={amb} color="#8190b0" groundColor="#1a1716" />
+      <hemisphereLight ref={amb} color="#a3a8b3" groundColor="#1c1a18" />
       {/* cold moonlight from the window on the left wall */}
       <directionalLight
         ref={moon}
@@ -55,7 +55,7 @@ function Lights() {
         position={[0, 3.2, -0.55]}
         target-position={[0, 1.2, -1.25]}
         color="#3a6f62"
-        angle={0.75}
+        angle={1}
         penumbra={1}
         distance={6}
         decay={2}
@@ -66,19 +66,21 @@ function Lights() {
 
 function Effects() {
   return (
-    <EffectComposer multisampling={4}>
+    <EffectComposer multisampling={0}>
+      <N8AO aoRadius={0.25} distanceFalloff={0.6} intensity={2.4} quality="medium" halfRes color="#000000" />
       <Outline visibleEdgeColor={0xbfe3d6} hiddenEdgeColor={0x336356} edgeStrength={4} blur pulseSpeed={0.35} width={900} />
       <Bloom mipmapBlur luminanceThreshold={0.95} luminanceSmoothing={0.2} intensity={0.9} radius={0.7} />
       <ToneMapping mode={ToneMappingMode.AGX} />
       <Vignette offset={0.25} darkness={0.8} />
-      <Noise opacity={0.045} premultiply />
+      <Noise opacity={0.035} premultiply />
+      <SMAA />
     </EffectComposer>
   )
 }
 
 function Dust() {
   // motes drifting through the lamp beam
-  return <Sparkles count={36} scale={[0.45, 0.38, 0.3]} position={[-0.45, 0.98, -0.25]} size={0.7} speed={0.15} opacity={0.22} color="#dfe8ff" />
+  return <Sparkles count={45} scale={[0.45, 0.38, 0.3]} position={[-0.45, 0.98, -0.25]} size={0.22} speed={0.12} opacity={0.3} color="#dfe8ff" />
 }
 
 export default function Scene() {
@@ -89,7 +91,7 @@ export default function Scene() {
       <fog attach="fog" args={['#050506', 5, 14]} />
       <CameraRig />
       <Lights />
-      <Environment resolution={128} environmentIntensity={0.25}>
+      <Environment resolution={128} environmentIntensity={0.16}>
         <Lightformer form="rect" intensity={2} color="#d6e6ff" position={[-0.4, 2, 0]} scale={[2, 0.4, 1]} rotation-x={Math.PI / 2} />
         <Lightformer form="circle" intensity={2} color="#ff9442" position={[1, 1, 1]} scale={0.5} />
         <Lightformer form="rect" intensity={1} color="#5a6780" position={[-3, 1.5, 0]} scale={[2, 2, 1]} rotation-y={Math.PI / 2} />

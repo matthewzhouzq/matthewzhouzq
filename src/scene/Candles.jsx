@@ -4,7 +4,7 @@ import { Billboard } from '@react-three/drei'
 import * as THREE from 'three'
 import { useIntroClock } from './useIntroClock'
 
-const WARM = new THREE.Color('#ff9442')
+const WARM = new THREE.Color('#ff8a3d')
 
 function glowTexture() {
   const c = document.createElement('canvas')
@@ -81,7 +81,7 @@ export default function Candles(props) {
     const t = state.clock.elapsedTime
     const lit = THREE.MathUtils.clamp((intro.current - 1.4) * 1.2, 0, 1)
     const f = 1 + Math.sin(t * 9) * 0.08 + Math.sin(t * 17.3) * 0.06 + (Math.random() - 0.5) * 0.1
-    light.current.intensity = lit * 0.55 * f
+    light.current.intensity = lit * 0.7 * f
     light.current.position.x = Math.sin(t * 3.1) * 0.004
   })
   return (
@@ -96,7 +96,7 @@ export default function Candles(props) {
         <Candle x={0.032} z={-0.025} r={0.024} h={0.09} delay={1.65} glow={glow} />
         <Candle x={0.03} z={0.045} r={0.02} h={0.06} delay={1.9} glow={glow} />
       </group>
-      <pointLight ref={light} position={[0, 0.2, 0]} color={WARM} distance={2.2} decay={2} />
+      <pointLight ref={light} position={[0, 0.2, 0]} color={WARM} distance={3} decay={2} castShadow shadow-mapSize={[512, 512]} shadow-bias={-0.002} shadow-radius={8} />
     </group>
   )
 }

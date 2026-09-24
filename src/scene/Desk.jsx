@@ -1,11 +1,11 @@
 import { RoundedBox } from '@react-three/drei'
-import { matteNoise } from './textures'
+import { deskMaps } from './textures'
 import { DESK_Y } from '../store'
 
 const W = 1.7, D = 0.8, T = 0.03
 
 export default function Desk() {
-  const noise = matteNoise()
+  const maps = deskMaps()
   const legH = DESK_Y - T
   const steel = <meshStandardMaterial color="#0e0e10" roughness={0.45} metalness={0.6} />
   const legs = [
@@ -19,10 +19,12 @@ export default function Desk() {
       <RoundedBox args={[W, T, D]} radius={0.006} smoothness={3} position={[0, DESK_Y - T / 2, 0]} castShadow receiveShadow>
         <meshPhysicalMaterial
           color="#0b0b0c"
-          roughness={0.42}
-          roughnessMap={noise}
-          clearcoat={0.35}
-          clearcoatRoughness={0.35}
+          roughness={0.55}
+          roughnessMap={maps.roughnessMap}
+          normalMap={maps.normalMap}
+          normalScale={[0.12, 0.12]}
+          clearcoat={0.18}
+          clearcoatRoughness={0.45}
         />
       </RoundedBox>
       {legs.map(([x, z], i) => (

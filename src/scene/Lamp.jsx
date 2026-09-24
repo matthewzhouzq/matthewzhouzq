@@ -2,6 +2,9 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js'
+
+RectAreaLightUniformsLib.init()
 import { useIntroClock } from './useIntroClock'
 
 // Minimal folding LED bar lamp (cold light)
@@ -11,6 +14,7 @@ const COLD = new THREE.Color('#d6e6ff')
 
 export default function Lamp(props) {
   const light = useRef()
+  const area = useRef()
   const strip = useRef()
   const target = useMemo(() => new THREE.Object3D(), [])
   const intro = useIntroClock()
@@ -23,7 +27,8 @@ export default function Lamp(props) {
     if (t > 0.9 && t < 1.6) k = Math.random() > 0.35 ? 1 : 0.15
     const on = THREE.MathUtils.lerp(light.current.userData.k ?? 0, k, 0.5)
     light.current.userData.k = on
-    light.current.intensity = on * 7
+    light.current.intensity = on * 3.2
+    area.current.intensity = on * 9
     strip.current.color.copy(COLD).multiplyScalar(0.3 + on * 2.8)
   })
 
@@ -70,6 +75,7 @@ export default function Lamp(props) {
           <planeGeometry args={[ARM - 0.05, 0.018]} />
           <meshBasicMaterial ref={strip} toneMapped={false} />
         </mesh>
+        <rectAreaLight ref={area} position={[ARM / 2 - 0.02, -0.007, 0]} rotation={[-Math.PI / 2, 0, 0]} width={ARM - 0.05} height={0.02} color={COLD} />
         <spotLight
           ref={light}
           position={[ARM / 2 - 0.02, -0.01, 0]}

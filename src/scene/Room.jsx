@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { carpetTexture, matteNoise, nightTexture } from './textures'
+import { carpetMaps, wallMaps, nightTexture } from './textures'
 import { Foliage } from './Plant'
 import { PALETTE } from '../data'
 
@@ -94,20 +94,20 @@ function FloorPlant({ position, scale = 1 }) {
 }
 
 export default function Room() {
-  const carpet = carpetTexture()
-  const noise = matteNoise()
+  const carpet = carpetMaps()
+  const wall = wallMaps()
   return (
     <group>
       {/* carpet */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[12, 12]} />
-        <meshStandardMaterial color="#35353a" map={carpet} bumpMap={carpet} bumpScale={0.6} roughness={1} />
+        <meshStandardMaterial {...carpet} normalScale={[0.8, 0.8]} roughness={1} />
       </mesh>
 
       {/* back wall */}
       <mesh position={[0, 2, WALL_Z]} receiveShadow>
         <planeGeometry args={[10, 4]} />
-        <meshStandardMaterial color="#1b1b1e" roughness={0.92} roughnessMap={noise} />
+        <meshStandardMaterial {...wall} normalScale={[0.35, 0.35]} roughness={0.88} />
       </mesh>
       {/* panel moldings like the reference photo */}
       {[-1.5, 0, 1.5].map((x) => (
@@ -122,7 +122,7 @@ export default function Room() {
       {/* left wall */}
       <mesh position={[LEFT_X, 2, 2]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[8, 4]} />
-        <meshStandardMaterial color="#111113" roughness={0.92} />
+        <meshStandardMaterial {...wall} normalScale={[0.35, 0.35]} roughness={0.88} />
       </mesh>
       <Window />
 

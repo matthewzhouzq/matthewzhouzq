@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
-import { keyboardTexture, laptopScreenTexture } from './textures'
+import { keyboardTexture, laptopScreenTexture, aluMaps } from './textures'
 import { useStore } from '../store'
 import { useIntroClock } from './useIntroClock'
 
@@ -33,7 +33,7 @@ export default function Laptop() {
     <group>
       {/* base */}
       <RoundedBox args={[W, BH, D]} radius={0.005} smoothness={4} position={[0, BH / 2, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color={ALU} metalness={0.85} roughness={0.32} />
+        <meshStandardMaterial color={ALU} metalness={0.9} roughness={0.38} {...aluMaps()} />
       </RoundedBox>
       {/* keyboard well */}
       <mesh position={[0, BH + 0.0003, -0.028]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -49,7 +49,7 @@ export default function Laptop() {
       {/* lid — hinge at the back edge */}
       <group ref={lid} position={[0, BH, -D / 2 + 0.002]}>
         <RoundedBox args={[W, LT, D]} radius={0.0025} smoothness={3} position={[0, LT / 2, D / 2]} castShadow>
-          <meshStandardMaterial color={ALU} metalness={0.85} roughness={0.3} />
+          <meshStandardMaterial color={ALU} metalness={0.9} roughness={0.36} {...aluMaps()} />
         </RoundedBox>
         {/* bezel */}
         <mesh position={[0, -0.0002, D / 2]} rotation={[Math.PI / 2, 0, 0]}>

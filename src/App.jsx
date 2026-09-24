@@ -27,7 +27,7 @@ export default function App() {
     <div className={`app ${focus ? 'is-focused' : ''} ${hovered ? 'is-hovering' : ''}`}>
       <Canvas
         className="canvas"
-        shadows
+        shadows={{ type: THREE.PCFShadowMap }}
         dpr={[1, 1.75]}
         camera={{ fov: 32, near: 0.02, far: 30, position: [3.4, 2.4, 4.2] }}
         gl={{ antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}

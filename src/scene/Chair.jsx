@@ -1,10 +1,12 @@
 import { RoundedBox } from '@react-three/drei'
+import { fabricMaps } from './textures'
 
 // Modern padded task chair, soft grey fabric. Origin = floor under the gas lift.
-const FABRIC = '#6c6b6f'
+const FABRIC = '#8f8e92'
 
 function Fabric(props) {
-  return <meshStandardMaterial color={FABRIC} roughness={0.96} {...props} />
+  const m = fabricMaps()
+  return <meshStandardMaterial color={FABRIC} {...m} normalScale={[0.6, 0.6]} roughness={0.97} {...props} />
 }
 
 export default function Chair(props) {
