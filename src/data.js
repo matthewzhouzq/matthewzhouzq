@@ -26,7 +26,8 @@ export const PROJECTS = [
     tagline: 'AI mind-mapping that clusters your ideas and suggests the next one.',
     stack: ['React Flow', 'Node', 'Python', 'PostgreSQL', 'Docker'],
     accent: '#336356',
-    link: '#',
+    link: '#', // live demo / write-up URL
+    github: 'https://github.com/matthewzhouzq', // TODO: point at the repo
   },
   {
     id: 'navigator',
@@ -35,7 +36,8 @@ export const PROJECTS = [
     tagline: 'Traffic routing for Ottawa, built on 7 years of city data. Featured by Ottawa Citizen & CTV.',
     stack: ['JavaScript', 'Three.js', 'Leaflet', 'Python', 'OpenAI'],
     accent: '#4B4A5A',
-    link: '#',
+    link: '#', // live demo / write-up URL
+    github: 'https://github.com/matthewzhouzq', // TODO: point at the repo
   },
   {
     id: 'tempora',
@@ -44,7 +46,8 @@ export const PROJECTS = [
     tagline: 'A productivity Chrome extension that reached 40+ users.',
     stack: ['JavaScript', 'Chrome API', 'Python'],
     accent: '#5b4a63',
-    link: '#',
+    link: '#', // live demo / write-up URL
+    github: 'https://github.com/matthewzhouzq', // TODO: point at the repo
   },
   {
     id: 'template-4',
@@ -53,7 +56,8 @@ export const PROJECTS = [
     tagline: 'Template card — replace with a real project in src/data.js.',
     stack: ['Stack', 'Goes', 'Here'],
     accent: '#22302E',
-    link: '#',
+    link: '#', // live demo / write-up URL
+    github: 'https://github.com/matthewzhouzq', // TODO: point at the repo
   },
   {
     id: 'template-5',
@@ -62,7 +66,8 @@ export const PROJECTS = [
     tagline: 'Template card — replace with a real project in src/data.js.',
     stack: ['Stack', 'Goes', 'Here'],
     accent: '#3a3f4a',
-    link: '#',
+    link: '#', // live demo / write-up URL
+    github: 'https://github.com/matthewzhouzq', // TODO: point at the repo
   },
 ]
 
