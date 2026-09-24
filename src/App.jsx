@@ -1,59 +1,50 @@
+import { Suspense, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Routes, Route, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
-
-import CubeField from './components/CubeField'
-import Name from './components/Name'
-import Cursor from './components/Cursor'
-import BackButton from './components/BackButton'
-
-// Pages
-import About from './pages/About'
-import Projects from './pages/Projects'
-import Resume from './pages/Resume'
-import Contact from './pages/Contact'
-import Nodalityai from './projects/Nodalityai';
-import Tempora from './projects/Tempora';
-import LazyPaste from './projects/LazyPaste';
-import Navigatorai from './projects/Navigatorai';
+import * as THREE from 'three'
+import Scene from './scene/Scene'
+import Loader from './ui/Loader'
+import Hud from './ui/Hud'
+import Cursor from './ui/Cursor'
+import LaptopView from './ui/LaptopView'
+import PhoneView from './ui/PhoneView'
+import ResumeView from './ui/ResumeView'
+import ClockView from './ui/ClockView'
+import PlantView from './ui/PlantView'
+import { useStore } from './store'
 
 export default function App() {
+  const focus = useStore((s) => s.focus)
+  const hovered = useStore((s) => s.hovered)
+  const setFocus = useStore((s) => s.setFocus)
+
   useEffect(() => {
-    window.__UI_HOVERING__ = false
-  }, [])
-
-  const location = useLocation()
-
-  const isHome = location.pathname === '/'
+    const onKey = (e) => e.key === 'Escape' && setFocus(null)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [setFocus])
 
   return (
-    <div className="app">
-      <Cursor />
-
+    <div className={`app ${focus ? 'is-focused' : ''} ${hovered ? 'is-hovering' : ''}`}>
       <Canvas
         className="canvas"
-        camera={{ position: [45, 90, 45], fov: 20 }}
+        shadows
+        dpr={[1, 1.75]}
+        camera={{ fov: 32, near: 0.02, far: 30, position: [3.4, 2.4, 4.2] }}
+        gl={{ antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
       >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 10, 5]} />
-        <CubeField />
+        <Suspense fallback={null}>
+          <Scene />
+        </Suspense>
       </Canvas>
 
-      <div className="overlay">
-        {!isHome && <BackButton />}
-
-        <Routes>
-          <Route path="/" element={<Name />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/resume" element={<Resume />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/projects/Nodalityai" element={<Nodalityai />} />
-          <Route path="/projects/Tempora" element={<Tempora />} />
-          <Route path="/projects/LazyPaste" element={<LazyPaste />} />
-          <Route path="/projects/Navigatorai" element={<Navigatorai />} />
-        </Routes>
-      </div>
+      <Hud />
+      <LaptopView open={focus === 'laptop'} />
+      <PhoneView open={focus === 'phone'} />
+      <ResumeView open={focus === 'resume'} />
+      <ClockView open={focus === 'clock'} />
+      <PlantView open={focus === 'plant'} />
+      <Loader />
+      <Cursor />
     </div>
   )
 }
