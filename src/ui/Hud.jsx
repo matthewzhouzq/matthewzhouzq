@@ -5,6 +5,7 @@ const NAV = [
   ['laptop', 'projects'],
   ['phone', 'contact'],
   ['resume', 'résumé'],
+  ['book', 'experience'],
   ['clock', 'timeline'],
   ['plant', 'life'],
 ]

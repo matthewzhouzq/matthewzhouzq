@@ -95,6 +95,76 @@ export const TIMELINE = [
 export const TIME_RANGE = [2021.5, 2027.5]
 export const NOW = 2026 + (new Date().getMonth() + new Date().getDate() / 31) / 12
 
+// Book → "chapters": work & team experience, in order. One chapter per spread.
+export const CHAPTERS = [
+  {
+    id: 'syrc',
+    org: 'Sparkling Youth Robotics Club',
+    short: 'SYRC · FIRST 8729',
+    role: 'Software Team Lead',
+    when: 'Jun 2023 — Jul 2025',
+    where: 'Ottawa, ON',
+    points: [
+      'Taught 19 software members to program and test command-based robots in Java.',
+      'Built swerve autonomous paths on Bézier trajectories in PathPlanner.',
+      'Ran vision on a Raspberry Pi 4 and tuned PID loops on real hardware.',
+    ],
+    stack: ['Java', 'WPILib', 'PathPlanner'],
+  },
+  {
+    id: 'vex',
+    org: 'VEX Team 50226A',
+    short: 'VEX 50226A',
+    role: 'Software Lead / Mechanical',
+    when: 'Oct 2023 — Feb 2025',
+    where: 'Ottawa, ON',
+    points: [
+      'Wrote autonomous and driver-control code in C++ around hardware limits.',
+      'Worked hands-on with pneumatics, then programmed them.',
+    ],
+    stack: ['C++', 'CAD'],
+  },
+  {
+    id: 'ytp',
+    org: 'Youth Tutoring Project — Ottawa',
+    short: 'YTP Ottawa',
+    role: 'Design Lead',
+    when: 'Oct 2024 — May 2025',
+    where: 'Remote',
+    points: [
+      'Automated Google Sheets with Python scripts deployed on Google Cloud.',
+      'Designed outreach posts and videos, with 3D graphics made in Blender.',
+    ],
+    stack: ['Python', 'Google Cloud', 'Blender'],
+  },
+  {
+    id: 'fsae',
+    org: 'McGill Formula SAE Electric',
+    short: 'Formula SAE',
+    role: 'Driverless / Autonomous Member',
+    when: 'Sep 2025 — now',
+    where: 'Montréal, QC',
+    points: [
+      'Training a YOLOv8 model for live cone detection across lighting conditions.',
+      'Writing ROS 2 nodes that handle high-frequency sensor data for autonomous driving.',
+    ],
+    stack: ['C++', 'ROS 2', 'Python', 'Docker'],
+  },
+  {
+    id: 'ciena',
+    org: 'Ciena',
+    short: 'Ciena',
+    role: 'Software Engineering Co-op · Reliability Engineering',
+    when: '2026', // TODO: exact dates
+    where: 'Ottawa, ON',
+    points: [
+      'Template — what you built, what it improved, and the tools you used.',
+      'Template — one result with a number in it.',
+    ],
+    stack: ['Add', 'Your', 'Stack'],
+  },
+]
+
 // Plant → life outside work
 export const INTERESTS = [
   { title: 'Soccer', text: 'Placeholder — your position, team, favourite club.', glyph: '⚽' },

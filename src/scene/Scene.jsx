@@ -15,6 +15,7 @@ import Phone from './Phone'
 import Resume from './Resume'
 import Clock from './Clock'
 import Plant from './Plant'
+import Book from './Book'
 import Interactive from './Interactive'
 import CameraRig from './CameraRig'
 import { useIntroClock } from './useIntroClock'
@@ -115,6 +116,9 @@ export default function Scene() {
             </Interactive>
             <Interactive id="resume" label="Résumé" sub="the paper" labelY={0.06} lift={0.008} {...at('resume')}>
               <Resume />
+            </Interactive>
+            <Interactive id="book" label="Chapters" sub="the book" labelY={0.08} lift={0.01} {...at('book')}>
+              <Book />
             </Interactive>
             <Interactive id="clock" label="Timeline" sub="wind the clock" labelY={0.2} {...at('clock')}>
               <Clock />

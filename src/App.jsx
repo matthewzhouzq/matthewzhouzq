@@ -10,6 +10,7 @@ import PhoneView from './ui/PhoneView'
 import ResumeView from './ui/ResumeView'
 import ClockView from './ui/ClockView'
 import PlantView from './ui/PlantView'
+import BookView from './ui/BookView'
 import { useStore } from './store'
 
 export default function App() {
@@ -43,6 +44,7 @@ export default function App() {
       <ResumeView open={focus === 'resume'} />
       <ClockView open={focus === 'clock'} />
       <PlantView open={focus === 'plant'} />
+      <BookView open={focus === 'book'} />
       <Loader />
       <Cursor />
     </div>
