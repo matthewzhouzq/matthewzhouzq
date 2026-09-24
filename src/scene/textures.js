@@ -82,7 +82,7 @@ export const laptopScreenTexture = () =>
     g.textAlign = 'left'
     // title
     g.fillStyle = 'rgba(255,255,255,0.92)'
-    g.font = '300 64px Georgia, serif'
+    g.font = "300 64px 'Work Sans', Helvetica, Arial"
     g.fillText('projects', 70, 250)
     g.font = '400 20px monospace'
     g.fillStyle = 'rgba(255,255,255,0.5)'
