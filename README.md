@@ -1,6 +1,6 @@
-# Matthew Zhou — a desk, after hours
+# Matthew Zhou 
 
-A 3D portfolio built entirely in code: React Three Fiber, drei and postprocessing. There are no Blender models.
+A 3D portfolio built entirely in code: React Three Fiber, drei and postprocessing. (no Blender models)
 
 ```bash
 npm install
