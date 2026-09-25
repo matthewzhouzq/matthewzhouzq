@@ -49,26 +49,6 @@ export const PROJECTS = [
     link: '#', // live demo / write-up URL
     github: 'https://github.com/matthewzhouzq', // TODO: point at the repo
   },
-  {
-    id: 'template-4',
-    title: 'Project Four',
-    year: 'YYYY',
-    tagline: 'Template card — replace with a real project in src/data.js.',
-    stack: ['Stack', 'Goes', 'Here'],
-    accent: '#22302E',
-    link: '#', // live demo / write-up URL
-    github: 'https://github.com/matthewzhouzq', // TODO: point at the repo
-  },
-  {
-    id: 'template-5',
-    title: 'Project Five',
-    year: 'YYYY',
-    tagline: 'Template card — replace with a real project in src/data.js.',
-    stack: ['Stack', 'Goes', 'Here'],
-    accent: '#3a3f4a',
-    link: '#', // live demo / write-up URL
-    github: 'https://github.com/matthewzhouzq', // TODO: point at the repo
-  },
 ]
 
 // iPhone → vertical contact pages
