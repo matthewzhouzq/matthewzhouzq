@@ -69,7 +69,7 @@ export const TIMELINE = [
   { t: 2025.66, title: 'McGill', text: 'Started Software Engineering Co-op.' },
   { t: 2025.7, title: 'Formula SAE Electric', text: 'Driverless team — YOLOv8 cone detection, ROS 2.' },
   { t: 2025.8, title: 'Nodality.ai', text: 'An AI that thinks in graphs.' },
-  { t: 2026.35, title: 'Ciena', text: 'Software engineering co-op, Reliability Engineering.' },
+  { t: 2026.35, title: 'Ciena', text: 'Reliability Engineer Intern — RAG tooling and lab test automation.' },
   { t: 2027.2, title: '??? ', text: 'Next chapter: software / AI infrastructure. Let’s talk.' },
 ]
 export const TIME_RANGE = [2021.5, 2027.5]
@@ -95,7 +95,7 @@ export const CHAPTERS = [
     id: 'vex',
     org: 'VEX Team 50226A',
     short: 'VEX 50226A',
-    role: 'Software Lead / Mechanical',
+    role: 'Software Team Lead / Mechanical',
     when: 'Oct 2023 — Feb 2025',
     where: 'Ottawa, ON',
     points: [
@@ -134,14 +134,16 @@ export const CHAPTERS = [
     id: 'ciena',
     org: 'Ciena',
     short: 'Ciena',
-    role: 'Software Engineering Co-op · Reliability Engineering',
-    when: '2026', // TODO: exact dates
+    role: 'Reliability Engineer Intern',
+    when: 'May 2026 — Aug 2026',
     where: 'Ottawa, ON',
     points: [
-      'Template — what you built, what it improved, and the tools you used.',
-      'Template — one result with a number in it.',
+      'Built an ETL pipeline that normalized FIT data from 5 card-type workbooks into a ChromaDB vector database, so 500+ test records can be matched by meaning.',
+      'Extended a hybrid-RAG FMECA prepopulation tool with a parallel FIT vector layer, showing real test results next to AI-predicted fields.',
+      'Automated SIR coupon resistance measurements, driving a Hioki IR meter and a 41-channel relay controller from Python with session-aware logging.',
+      'Tested capacitors and resoldered PCBs in the hardware lab to validate components for board reliability.',
     ],
-    stack: ['Add', 'Your', 'Stack'],
+    stack: ['Python', 'VBA', 'ChromaDB', 'RAG'],
   },
 ]
 
