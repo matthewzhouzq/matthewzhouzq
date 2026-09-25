@@ -1,4 +1,3 @@
-import { INTERESTS } from '../data'
 import { useDelayed } from './useDelayed'
 
 export default function PlantView({ open }) {
@@ -10,15 +9,10 @@ export default function PlantView({ open }) {
         <h2>What grows<br />outside work.</h2>
       </div>
       <div className="leaf-cards">
-        {INTERESTS.map((it, i) => (
-          <div className="leaf-card" key={it.title} style={{ '--i': i }}>
-            <span className="leaf-glyph">{it.glyph}</span>
-            <div>
-              <h3>{it.title}</h3>
-              <p>{it.text}</p>
-            </div>
-          </div>
-        ))}
+        {/* interests are on hold for now — restore by mapping INTERESTS here */}
+        <div className="leaf-card soon" style={{ '--i': 0 }}>
+          <p>soon...</p>
+        </div>
       </div>
     </div>
   )
