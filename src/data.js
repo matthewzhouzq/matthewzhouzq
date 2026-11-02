@@ -1,23 +1,14 @@
 // ─────────────────────────────────────────────────────────────
-//  All site content lives here. Edit this file to update the desk.
+//  All site content lives here.
 // ─────────────────────────────────────────────────────────────
-
-export const PALETTE = {
-  mist: '#4B4A5A', // grey-violet
-  teal: '#336356', // leaf green
-  pine: '#22302E', // deep green
-  plum: '#332A3A', // shadow plum
-  ink: '#232428', // near black
-}
 
 export const PROFILE = {
   name: 'Matthew Zhou',
   role: 'Software Engineering · McGill',
   resumePdf: 'matthewzhou_cv.pdf',
-  resumeImage: 'resume-page.png',
 }
 
-// Laptop → horizontal project carousel (templates for now)
+// Projects (page 2 — one dragon lap each)
 export const PROJECTS = [
   {
     id: 'nodality',
@@ -51,7 +42,7 @@ export const PROJECTS = [
   },
 ]
 
-// iPhone → vertical contact pages
+// Contact links
 export const CONTACTS = [
   { id: 'email', label: 'Email', value: 'matthewzhou.contacts@gmail.com', href: 'mailto:matthewzhou.contacts@gmail.com', action: 'Write to me', glyph: '✉' },
   { id: 'phone', label: 'Phone', value: '(613) 581-8828', href: 'tel:+16135818828', action: 'Call', glyph: '☏' },
@@ -59,23 +50,7 @@ export const CONTACTS = [
   { id: 'github', label: 'GitHub', value: 'matthewzhouzq', href: 'https://github.com/matthewzhouzq', action: 'See the code', glyph: '⌥' },
 ]
 
-// Clock → wind time through these milestones (year as a decimal: 2023.5 ≈ July 2023)
-export const TIMELINE = [
-  { t: 2021.8, title: 'Tempora', text: 'First shipped product — a Chrome extension built with 3 friends.' },
-  { t: 2023.45, title: 'FIRST Robotics 8729', text: 'Software team lead. Swerve autos, vision on a Raspberry Pi.' },
-  { t: 2023.7, title: 'navigator.ai', text: 'Traffic routing for Ottawa. Ended up on CTV.' },
-  { t: 2023.8, title: 'VEX 50226A', text: 'Software lead — autonomous code on stubborn hardware.' },
-  { t: 2024.8, title: 'YTP Ottawa', text: 'Design lead. 3D graphics in Blender, automation on Google Cloud.' },
-  { t: 2025.66, title: 'McGill', text: 'Started Software Engineering Co-op.' },
-  { t: 2025.7, title: 'Formula SAE Electric', text: 'Driverless team — YOLOv8 cone detection, ROS 2.' },
-  { t: 2025.8, title: 'Nodality.ai', text: 'An AI that thinks in graphs.' },
-  { t: 2026.35, title: 'Ciena', text: 'Reliability Engineer Intern — RAG tooling and lab test automation.' },
-  { t: 2027.2, title: '??? ', text: 'Next chapter: software / AI infrastructure. Let’s talk.' },
-]
-export const TIME_RANGE = [2021.5, 2027.5]
-export const NOW = 2026 + (new Date().getMonth() + new Date().getDate() / 31) / 12
-
-// Book → "chapters": work & team experience, in order. One chapter per spread.
+// Work & team experience, in order (listed under Experience on page 1).
 export const CHAPTERS = [
   {
     id: 'syrc',
@@ -145,14 +120,6 @@ export const CHAPTERS = [
     ],
     stack: ['Python', 'VBA', 'ChromaDB', 'RAG'],
   },
-]
-
-// Plant → life outside work
-export const INTERESTS = [
-  { title: 'Soccer', text: 'Placeholder — your position, team, favourite club.', glyph: '⚽' },
-  { title: 'Games', text: 'Placeholder — what you play, and why you like designing them.', glyph: '🎮' },
-  { title: 'Creative code', text: 'Placeholder — 3D web, little browser games, weird prototypes.', glyph: '✦' },
-  { title: 'Content', text: 'Placeholder — video edits, highlight reels, tooling.', glyph: '▶' },
 ]
 
 // ─────────────────────────────────────────────────────────────

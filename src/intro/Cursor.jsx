@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { useStore } from '../store'
 
 // Soft dot + trailing ring. Ring blooms over interactive things.
 export default function Cursor() {
@@ -28,9 +27,8 @@ export default function Cursor() {
       cancelAnimationFrame(raf)
     }
   }, [])
-  const hovered = useStore((s) => s.hovered)
   return (
-    <div className={`cursor ${hovered ? 'hot' : ''}`} aria-hidden>
+    <div className="cursor" aria-hidden>
       <div ref={ring} className="cursor-ring"><span /></div>
       <div ref={dot} className="cursor-dot"><span /></div>
     </div>
