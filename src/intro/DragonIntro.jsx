@@ -17,13 +17,11 @@ const CAM_Z1 = 40 // scene 1 camera distance
 const CAM_Z2 = 24 // scene 2: pan right + zoom in, so the dragon reads larger
 // scroll timeline (0 → 1 over the whole page)
 const P1_END = 0.47 // dragon has left scene 1
-const SPLIT = 0.5 // switch the dragon over to scene 2 (off-screen in both)
-const PAN = [0.47, 0.57] // camera pans to scene 2
+const SPLIT = 0.5 // page 1 below this, page 2 at or above — never in between
 const ENTER_END = 0.6 // dragon has swooped in and joined the circle
 const WORK_START = 0.6
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
-const smooth = (a, b, v) => { const t = clamp01((v - a) / (b - a)); return t * t * (3 - 2 * t) }
 
 function Backdrop() {
   const mesh = useRef()
@@ -74,25 +72,34 @@ function Stage({ progress, onReveal }) {
     else if (mode !== d.mode) { // swap scenes while the dragon is off-screen in both
       d.mode = mode
       d.sHead = mode === 2 ? -body - 1.5 * s : path1.length + body + 2 * s
-      if (mode === 1) d.loop = 0
+      if (mode === 1) { d.loop = 0; d.enter = 0 }
     }
     if (mode === 1) {
       d.path = path1
       d.target = THREE.MathUtils.lerp(path1.length * 0.085, path1.length + body + 2 * s, clamp01(p / P1_END))
     } else {
       d.path = path2
-      const q = clamp01((p - SPLIT) / (ENTER_END - SPLIT))
-      if (q >= 1) d.loop += dt * (path2.circ / 10) // keeps circling, one lap ≈ 10 s
-      d.target = THREE.MathUtils.lerp(-body - 1.5 * s, path2.leadLen + 0.2 * path2.circ, q) + d.loop
+      // entrance only ever progresses forward (scrolling back up a bit won't reverse it)
+      d.enter = Math.max(d.enter || 0, clamp01((p - SPLIT) / (ENTER_END - SPLIT)))
+      if (d.enter >= 1) {
+        // speed comes from how fast you scroll — either direction — always clockwise; slow drift when idle
+        const scrolled = Math.min(0.02, Math.abs(p - (d.lastP ?? p)))
+        d.loop += dt * (path2.circ / 22) + scrolled * path2.circ * 7
+      }
+      d.target = THREE.MathUtils.lerp(-body - 1.5 * s, path2.leadLen + 0.2 * path2.circ, d.enter) + d.loop
     }
+    d.lastP = p
   }, [path1, path2, progress])
 
   const us = useMemo(() => INTRO_SECTIONS.map((sec) => path1.nearestU(sec.rx ?? sec.x, sec.ry ?? sec.y)), [path1])
   const last = useRef('')
-  useFrame(() => {
+  const pan = useRef(progress.current >= SPLIT ? 1 : 0)
+  useFrame((_, dt) => {
     const p = progress.current
-    const pan = smooth(PAN[0], PAN[1], p)
-    camera.position.set(THREE.MathUtils.lerp(0, X2, pan), 0, THREE.MathUtils.lerp(CAM_Z1, CAM_Z2, pan))
+    // which page we're on is binary; the camera just makes one quick timed move between them
+    pan.current = THREE.MathUtils.damp(pan.current, p >= SPLIT ? 1 : 0, 7, Math.min(dt, 0.05))
+    const e = pan.current
+    camera.position.set(THREE.MathUtils.lerp(0, X2, e), 0, THREE.MathUtils.lerp(CAM_Z1, CAM_Z2, e))
     if (drive.sHead === null) return
     const hu = drive.mode === 1 ? drive.sHead / path1.length : 9
     const key = us.map((u) => (hu > u + 0.015 ? 1 : 0)).join('')
@@ -143,7 +150,7 @@ export default function DragonIntro() {
   }, [])
   const jumpToWork = useCallback((i = 0) => scrollToP(WORK_START + ((i + 0.5) / WORK.length) * (1 - WORK_START)), [scrollToP])
 
-  const pan = smooth(PAN[0], PAN[1], p)
+  const page2 = p >= SPLIT
   const workIndex = Math.min(WORK.length - 1, Math.max(0, Math.floor(((p - WORK_START) / (1 - WORK_START)) * WORK.length)))
 
   return (
@@ -169,12 +176,12 @@ export default function DragonIntro() {
           <button className="intro-skip" onClick={() => jumpToWork(0)}>what I’m building ↓</button>
         </header>
 
-        <div className="scene1" style={{ transform: `translateX(${-pan * 100}vw)`, opacity: 1 - pan }}>
+        <div className={`scene1 ${page2 ? 'away' : ''}`}>
           <Sections revealed={revealed} onNav={() => jumpToWork(0)} />
           <div className={`intro-hint ${p > 0.02 ? 'hide' : ''}`}><span>scroll</span><i /></div>
         </div>
 
-        <Work index={workIndex} shown={p > ENTER_END - 0.02} pan={pan} onJump={jumpToWork} />
+        <Work index={workIndex} shown={page2} onJump={jumpToWork} />
         <LoadVeil />
       </div>
       <div className="intro-track" aria-hidden />

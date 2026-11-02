@@ -1,10 +1,10 @@
 import { WORK } from '../data'
 
 /** Scene 2: one piece of work at a time, centred inside the dragon's circle. */
-export default function Work({ index, shown, pan, onJump }) {
+export default function Work({ index, shown, onJump }) {
   const item = WORK[index]
   return (
-    <div className={`work ${shown ? 'in' : ''}`} style={{ transform: `translateX(${(1 - pan) * 100}vw)` }}>
+    <div className={`work ${shown ? 'in' : ''}`}>
       <p className="work-eyebrow">what I’m building</p>
 
       <article className="work-panel" key={item.id}>

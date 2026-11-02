@@ -3,7 +3,9 @@
 .intro-stage { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
 .intro-canvas { position: absolute !important; inset: 0; }
 .intro-track { height: 1500vh; }
-.scene1 { position: absolute; inset: 0; pointer-events: none; z-index: 2; will-change: transform; }
+.scene1 { position: absolute; inset: 0; pointer-events: none; z-index: 2; transition: transform 0.6s var(--ease), opacity 0.45s var(--ease); }
+.scene1.away { transform: translateX(-100vw); opacity: 0; }
+.scene1.away > * { pointer-events: none; }
 .scene1 > * { pointer-events: auto; }
 
 .intro-top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center;
@@ -72,7 +74,9 @@
 }
 
 /* ── scene 2: what I'm building ───────────────── */
-.work { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.8s var(--ease); will-change: transform; }
+.work { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; transform: translateX(100vw);
+  transition: transform 0.6s var(--ease), opacity 0.45s var(--ease) 0.1s; }
+.work.in { transform: none; }
 .work.in { opacity: 1; }
 .work.in > * { pointer-events: auto; }
 .work-eyebrow { position: absolute; top: 74px; left: clamp(18px, 3vw, 36px); font: 400 10px/1 var(--mono); letter-spacing: 0.3em;
