@@ -17,8 +17,8 @@ function Stage({ progress, onReveal }) {
   const { viewport, camera } = useThree()
   const vp = viewport.getCurrentViewport(camera, [0, 0, 0])
   const path = useMemo(() => makeWorldPath(vp.width, vp.height), [vp.width, vp.height])
-  // dragon spans ~30% of the screen width (it's ~14.6 m long at scale 1)
-  const scale = THREE.MathUtils.clamp((vp.width * 0.3) / 14.6, 0.28, 1.1)
+  // dragon spans ~45% of the screen width (it is ~14.6 m long at scale 1)
+  const scale = THREE.MathUtils.clamp((vp.width * 0.45) / 14.6, 0.4, 1.6)
   const drive = useMemo(() => ({ sHead: null, wavePhase: 0, bodyLen: 14.6, scale }), [])
   drive.scale = scale
   const us = useMemo(() => INTRO_SECTIONS.map((s) => path.nearestU(s.x, s.from === 'bottom' ? s.y - 0.08 : s.y)), [path])
