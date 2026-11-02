@@ -1,11 +1,11 @@
 import { WORK } from '../data'
 
-/** Scene 2: one piece of work at a time, centred inside the dragon's circle. */
+/** Scene 2: one project at a time, centred inside the dragon's circle. Each lap = next project. */
 export default function Work({ index, shown, onJump }) {
   const item = WORK[index]
   return (
     <div className={`work ${shown ? 'in' : ''}`}>
-      <p className="work-eyebrow">what I’m building</p>
+      <p className="work-eyebrow">projects</p>
 
       <article className="work-panel" key={item.id}>
         <p className="work-kicker">

@@ -199,50 +199,16 @@ export const INTRO_SECTIONS = [
     body: 'Open to software, platform and AI-infrastructure teams. Happy to talk about anything on this page.',
     links: [
       { label: 'Email me', href: 'mailto:matthewzhou.contacts@gmail.com' },
-      { label: 'See what I’m building', to: 'work' },
+      { label: 'See my projects', to: 'work' },
     ],
   },
 ]
 
 // ─────────────────────────────────────────────────────────────
-//  Scene 2 — what I'm building. The dragon circles these as you scroll.
-//  status: 'now' (in progress) or a year range for finished work.
+//  Scene 2 — projects. Each full lap the dragon makes around the circle switches to the next one.
 // ─────────────────────────────────────────────────────────────
-export const WORK = [
-  {
-    id: 'cura', status: 'now', title: 'Cura', kind: 'iOS app',
-    summary: 'A virtual wardrobe and fashion-discovery app for iOS.',
-    points: [
-      'Prototyped a 3D wardrobe in Three.js.',
-      'Built and tested a phone-frame wireframe on real devices.',
-      'Exploring the Spotify Web API so posts can be tagged with music.',
-    ],
-    stack: ['iOS', 'Three.js', 'Spotify Web API'],
-    links: [],
-  },
-  {
-    id: 'oinky', status: 'now', title: 'Oinky', kind: 'robot',
-    summary: 'A one-eyed baby pig robot, inspired by Pollen’s open-source Microduck.',
-    points: [
-      'Simulating it first, the software-engineer way, before building the real one.',
-      'My route into robotics — learning it from the ground up.',
-    ],
-    stack: ['Simulation', 'Robotics'],
-    links: [],
-  },
-  {
-    id: 'site', status: 'now', title: 'This dragon', kind: 'website',
-    summary: 'A dragon rigged and animated in Blender, flown live in the browser as you scroll.',
-    points: [
-      'Spine traced automatically from the sculpt, then rigged and skinned.',
-      'Scroll drives a follow-the-leader flight with a wave down the body.',
-    ],
-    stack: ['Blender', 'three.js', 'React Three Fiber'],
-    links: [{ label: 'Source', href: 'https://github.com/matthewzhouzq/matthewzhouzq' }],
-  },
-  ...PROJECTS.map((p) => ({
-    id: p.id, status: p.year, title: p.title, kind: 'project',
-    summary: p.tagline, points: [], stack: p.stack,
-    links: [p.github && { label: 'GitHub', href: p.github }].filter(Boolean),
-  })),
-]
+export const WORK = PROJECTS.map((p) => ({
+  id: p.id, status: p.year, title: p.title, kind: 'project',
+  summary: p.tagline, points: [], stack: p.stack,
+  links: [p.github && { label: 'GitHub', href: p.github }].filter(Boolean),
+}))

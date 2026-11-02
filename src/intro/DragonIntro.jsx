@@ -47,7 +47,7 @@ function Backdrop() {
   return <mesh ref={mesh} material={mat} renderOrder={-1}><planeGeometry /></mesh>
 }
 
-function Stage({ progress, onReveal }) {
+function Stage({ progress, onReveal, onLap }) {
   const { size, camera } = useThree()
   const H = 2 * CAM_Z1 * Math.tan(THREE.MathUtils.degToRad(FOV / 2))
   const W = H * (size.width / size.height)
@@ -80,21 +80,18 @@ function Stage({ progress, onReveal }) {
     } else {
       d.path = path2
       d.enter = clamp01((p - SPLIT) / (ENTER_END - SPLIT))
-      if (d.enter >= 1) {
-        // only moves when you scroll: down → clockwise, up → backwards, speed = how fast you scroll
-        const dp = THREE.MathUtils.clamp(p - (d.lastP ?? p), -0.02, 0.02)
-        d.loop += dp * path2.circ * 7
-        // going backwards: wrap a full lap so it keeps circling instead of reversing out the way it came
-        if (d.loop < 0) { d.loop += path2.circ; d.sHead += path2.circ }
-      }
-      // the swoop ends with the whole body on the circle
-      d.target = THREE.MathUtils.lerp(-body - 1.5 * s, path2.leadLen + body + 0.1 * path2.circ, d.enter) + d.loop
+      // after the swoop, scrolling drives the dragon round the circle: one full lap per project
+      // (down → clockwise, up → backwards; it only moves when you scroll)
+      d.loop = clamp01((p - WORK_START) / (1 - WORK_START)) * WORK.length * path2.circ
+      d.lapStart = path2.leadLen + body + 0.1 * path2.circ // head position when the swoop ends
+      d.target = THREE.MathUtils.lerp(-body - 1.5 * s, d.lapStart, d.enter) + d.loop
     }
     d.lastP = p
   }, [path1, path2, progress])
 
   const us = useMemo(() => INTRO_SECTIONS.map((sec) => path1.nearestU(sec.rx ?? sec.x, sec.ry ?? sec.y)), [path1])
   const last = useRef('')
+  const lastLap = useRef(-1)
   const pan = useRef(progress.current >= SPLIT ? 1 : 0)
   useFrame((_, dt) => {
     const p = progress.current
@@ -103,6 +100,10 @@ function Stage({ progress, onReveal }) {
     const e = pan.current
     camera.position.set(THREE.MathUtils.lerp(0, X2, e), 0, THREE.MathUtils.lerp(CAM_Z1, CAM_Z2, e))
     if (drive.sHead === null) return
+    if (drive.mode === 2 && drive.lapStart != null) {
+      const lap = Math.min(WORK.length - 1, Math.max(0, Math.floor((drive.sHead - drive.lapStart) / path2.circ)))
+      if (lap !== lastLap.current) { lastLap.current = lap; onLap(lap) }
+    }
     const hu = drive.mode === 1 ? drive.sHead / path1.length : 9
     const key = us.map((u) => (hu > u + 0.015 ? 1 : 0)).join('')
     if (key !== last.current) { last.current = key; onReveal(key.split('').map((c) => c === '1')) }
@@ -138,6 +139,7 @@ export default function DragonIntro() {
   const progress = useRef(0)
   const [p, setP] = useState(0)
   const [revealed, setRevealed] = useState(() => INTRO_SECTIONS.map(() => false))
+  const [workIndex, setWorkIndex] = useState(0)
 
   const onScroll = useCallback((e) => {
     const el = e.currentTarget
@@ -153,7 +155,6 @@ export default function DragonIntro() {
   const jumpToWork = useCallback((i = 0) => scrollToP(WORK_START + ((i + 0.5) / WORK.length) * (1 - WORK_START)), [scrollToP])
 
   const page2 = p >= SPLIT
-  const workIndex = Math.min(WORK.length - 1, Math.max(0, Math.floor(((p - WORK_START) / (1 - WORK_START)) * WORK.length)))
 
   return (
     <div className="intro" ref={scroller} onScroll={onScroll}>
@@ -165,7 +166,7 @@ export default function DragonIntro() {
           gl={{ antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
         >
           <Suspense fallback={null}>
-            <Stage progress={progress} onReveal={setRevealed} />
+            <Stage progress={progress} onReveal={setRevealed} onLap={setWorkIndex} />
             <EffectComposer multisampling={4}>
               <Bloom mipmapBlur intensity={0.85} luminanceThreshold={0.62} luminanceSmoothing={0.2} radius={0.72} />
               <Vignette offset={0.3} darkness={0.5} />
@@ -175,7 +176,7 @@ export default function DragonIntro() {
 
         <header className="intro-top">
           <button className="intro-name" onClick={() => scrollToP(0)}>{PROFILE.name.toLowerCase()}</button>
-          <button className="intro-skip" onClick={() => jumpToWork(0)}>what I’m building ↓</button>
+          <button className="intro-skip" onClick={() => jumpToWork(0)}>projects ↓</button>
         </header>
 
         <div className={`scene1 ${page2 ? 'away' : ''}`}>
