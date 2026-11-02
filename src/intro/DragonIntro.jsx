@@ -86,8 +86,11 @@ function Stage({ progress, onReveal }) {
         const dp = THREE.MathUtils.clamp(p - (d.lastP ?? p), -0.02, 0.02)
         if (dp !== 0) d.dir = Math.sign(dp)
         d.loop += dt * (path2.circ / 22) * (d.dir ?? 1) + dp * path2.circ * 7
+        // going backwards: wrap a full lap so it keeps circling instead of reversing out the way it came
+        if (d.loop < 0) { d.loop += path2.circ; d.sHead += path2.circ }
       }
-      d.target = THREE.MathUtils.lerp(-body - 1.5 * s, path2.leadLen + 0.2 * path2.circ, d.enter) + d.loop
+      // the swoop ends with the whole body on the circle
+      d.target = THREE.MathUtils.lerp(-body - 1.5 * s, path2.leadLen + body + 0.1 * path2.circ, d.enter) + d.loop
     }
     d.lastP = p
   }, [path1, path2, progress])
