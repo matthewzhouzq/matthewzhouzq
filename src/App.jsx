@@ -12,17 +12,28 @@ import ClockView from './ui/ClockView'
 import PlantView from './ui/PlantView'
 import BookView from './ui/BookView'
 import { useStore } from './store'
+import DragonIntro from './intro/DragonIntro'
 
 export default function App() {
   const focus = useStore((s) => s.focus)
   const hovered = useStore((s) => s.hovered)
   const setFocus = useStore((s) => s.setFocus)
+  const entered = useStore((s) => s.entered)
+  const setEntered = useStore((s) => s.setEntered)
 
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && setFocus(null)
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [setFocus])
+
+  if (!entered)
+    return (
+      <>
+        <DragonIntro onEnter={setEntered} />
+        <Cursor />
+      </>
+    )
 
   return (
     <div className={`app ${focus ? 'is-focused' : ''} ${hovered ? 'is-hovering' : ''}`}>

@@ -154,3 +154,52 @@ export const INTERESTS = [
   { title: 'Creative code', text: 'Placeholder — 3D web, little browser games, weird prototypes.', glyph: '✦' },
   { title: 'Content', text: 'Placeholder — video edits, highlight reels, tooling.', glyph: '▶' },
 ]
+
+// ─────────────────────────────────────────────────────────────
+//  Dragon intro — the white text the dragon flies over.
+//  x / y place each block on screen (0→1, from top-left), along the flight path.
+//  from: 'top' | 'bottom' — which edge is pinned (bottom-pinned blocks expand upward).
+// ─────────────────────────────────────────────────────────────
+export const COOP_STATUS = {
+  headline: 'Looking for a co-op',
+  detail: 'Summer 2027 · software & AI infrastructure',
+}
+
+export const INTRO_SECTIONS = [
+  {
+    id: 'about', kicker: 'about', title: PROFILE.name, sub: PROFILE.role,
+    x: 0.79, y: 0.4, from: 'top', align: 'left',
+    body: 'I build software that touches hardware — RAG tooling and lab automation at Ciena, driverless perception with McGill Formula SAE, and 3D on the web (like this dragon).',
+    links: [
+      { label: 'GitHub', href: 'https://github.com/matthewzhouzq' },
+      { label: 'LinkedIn', href: 'https://www.linkedin.com/in/matthewzhouzq/' },
+    ],
+  },
+  {
+    id: 'experience', kicker: 'experience', title: 'Ciena', sub: 'Reliability Engineer Intern · 2026',
+    x: 0.3, y: 0.46, from: 'top', align: 'left',
+    list: 'chapters', // filled from CHAPTERS
+    links: [{ label: 'Open the book on my desk', desk: 'book' }],
+  },
+  {
+    id: 'projects', kicker: 'projects', title: 'Things I’ve built', sub: 'Nodality.ai · navigator.ai · Tempora',
+    x: 0.155, y: 0.3, from: 'top', align: 'right',
+    list: 'projects', // filled from PROJECTS
+    links: [{ label: 'See them on the laptop', desk: 'laptop' }],
+  },
+  {
+    id: 'contact', kicker: 'résumé + contact', title: 'Say hello', sub: 'matthewzhou.contacts@gmail.com',
+    x: 0.11, y: 0.745, from: 'bottom', align: 'left',
+    list: 'contacts', // filled from CONTACTS
+    links: [{ label: 'Résumé (PDF)', href: PROFILE.resumePdf }],
+  },
+  {
+    id: 'coop', kicker: 'co-op status', title: COOP_STATUS.headline, sub: COOP_STATUS.detail,
+    x: 0.47, y: 0.965, from: 'bottom', align: 'left',
+    body: 'Open to software, platform and AI-infrastructure teams. Happy to talk about anything on this page.',
+    links: [
+      { label: 'Email me', href: 'mailto:matthewzhou.contacts@gmail.com' },
+      { label: 'Enter the workspace', desk: 'home' },
+    ],
+  },
+]
