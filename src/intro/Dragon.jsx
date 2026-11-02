@@ -6,12 +6,12 @@ import * as THREE from 'three'
 export const DRAGON_URL = `${import.meta.env.BASE_URL}models/dragon.glb`
 const NB = 30 // spine bones, Spine_00 (behind the head) → Spine_29 (tail tip)
 
-/** Satin black scales: soft coat + the baked normal map, with a faint glow along scale ridges. */
+/** Glossy black scales (toned down): clearcoat + the baked normal map, with a faint glow along scale ridges. */
 function makeScaleMaterial(normalMap) {
   const m = new THREE.MeshPhysicalMaterial({
-    color: '#08080b', roughness: 0.55, metalness: 0.08,
-    clearcoat: 0.3, clearcoatRoughness: 0.45, normalMap, normalScale: new THREE.Vector2(1.3, 1.3),
-    sheen: 0.12, sheenColor: new THREE.Color('#6e5f6a'), sheenRoughness: 0.6,
+    color: '#08080b', roughness: 0.44, metalness: 0.14,
+    clearcoat: 0.65, clearcoatRoughness: 0.24, normalMap, normalScale: new THREE.Vector2(1.35, 1.35),
+    sheen: 0.32, sheenColor: new THREE.Color('#6e5f6a'), sheenRoughness: 0.5,
   })
   m.onBeforeCompile = (shader) => {
     shader.uniforms.uGlow = { value: new THREE.Color('#c79aa6').multiplyScalar(1.5) }
@@ -21,7 +21,7 @@ function makeScaleMaterial(normalMap) {
       #ifdef USE_NORMALMAP_TANGENTSPACE
         float ridge = clamp(length(mapN.xy) * 1.6, 0.0, 1.0);
         float rim = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 2.5);
-        totalEmissiveRadiance += uGlow * (smoothstep(0.45, 0.95, ridge) * 0.08 + rim * 0.1);
+        totalEmissiveRadiance += uGlow * (smoothstep(0.4, 0.92, ridge) * 0.14 + rim * 0.13);
       #endif`)
   }
   return m
