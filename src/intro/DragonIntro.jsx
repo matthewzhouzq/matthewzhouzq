@@ -35,9 +35,6 @@ function Backdrop() {
         vec3 col = mix(cStorm * 0.6, cEve, smoothstep(0.05, 0.85, r));          // stormy haze up high
         col += cSun * 0.22 * pow(1.0 - vUv.y, 3.0);                               // dusk glow low on the horizon
         col += cCloud * 0.05 * smoothstep(0.6, 0.0, abs(vUv.y - 0.35));
-        // the light source: a soft moon-like glow up in the top-left
-        float g = length((vUv - vec2(0.14, 0.88)) * vec2(1.6, 1.0));
-        col += vec3(1.0, 0.93, 0.92) * (0.55 * exp(-g * g * 90.0) + 0.16 * exp(-g * 7.0));
         gl_FragColor = vec4(col, 1.0);
       }`,
   }), [])
@@ -125,12 +122,12 @@ function Stage({ progress, onReveal, onLap, onPage }) {
       <color attach="background" args={['#192231']} />
       <Backdrop />
       <ambientLight intensity={0.22} />
-      <directionalLight position={[-16, 18, 20]} intensity={3.6} color="#fff1ec" />
+      <directionalLight position={[-16, 18, 20]} intensity={4.2} color="#fff1ec" />
       <directionalLight position={[10, -6, -18]} intensity={4} color="#985E6D" />
       <directionalLight position={[-14, 4, -10]} intensity={2} color="#98878F" />
       <Environment resolution={128} frames={1}>
         <Lightformer form="rect" intensity={3} position={[0, 8, -4]} scale={[24, 2, 1]} />
-        <Lightformer form="circle" intensity={4} position={[-10, 10, 10]} scale={6} color="#fff1ec" />
+        <Lightformer form="circle" intensity={6} position={[-10, 10, 10]} scale={7} color="#fff1ec" />
         <Lightformer form="rect" intensity={1.4} position={[-10, 2, 6]} scale={[4, 12, 1]} color="#98878F" />
         <Lightformer form="rect" intensity={1.2} position={[10, -3, 6]} scale={[6, 6, 1]} color="#985E6D" />
       </Environment>
