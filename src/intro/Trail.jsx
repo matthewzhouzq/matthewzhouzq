@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -29,6 +29,7 @@ function useTrailMaterial(loop) {
 
 /** Scene 1: a thread of light along the flight line, hot just behind the tail. */
 export function LineTrail({ path, drive }) {
+  const mesh = useRef()
   const geo = useMemo(() => new THREE.TubeGeometry(path.curve, 900, 0.035 * drive.scale + 0.02, 8, false), [path, drive.scale])
   const mat = useTrailMaterial(false)
   useFrame(() => {
@@ -37,9 +38,10 @@ export function LineTrail({ path, drive }) {
       mat.uniforms.uHead.value = drive.sHead / path.length
       mat.uniforms.uTail.value = (drive.sHead - drive.bodyLen) / path.length
       mat.uniforms.uFade.value = Math.min(0.35, (drive.bodyLen * 1.3) / path.length)
-    } else { mat.uniforms.uHead.value = 2; mat.uniforms.uTail.value = 2 } // dragon has moved on: leave the faint thread
+    }
+    mesh.current.visible = drive.mode === 1 // page 2 never shows page 1's trail
   })
-  return <mesh geometry={geo} material={mat} frustumCulled={false} />
+  return <mesh ref={mesh} geometry={geo} material={mat} frustumCulled={false} />
 }
 
 /** Scene 2: a ring of light that the circling dragon keeps re-lighting. */

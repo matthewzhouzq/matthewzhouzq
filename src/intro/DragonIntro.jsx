@@ -16,8 +16,8 @@ const FOV = 30
 const CAM_Z1 = 40 // scene 1 camera distance
 const CAM_Z2 = 24 // scene 2: pan right + zoom in, so the dragon reads larger
 // scroll timeline (0 → 1 over the whole page)
-const P1_END = 0.47 // dragon has left scene 1
-const SPLIT = 0.5 // page 1 below this, page 2 at or above — never in between
+const SPLIT = 0.5 // page 1 below this, page 2 at or above — never in between.
+// At SPLIT the dragon is 3/4 of the way off page 1, and page 2 opens with its head already in view.
 const ENTER_END = 0.6 // dragon has swooped in and joined the circle
 const WORK_START = 0.6
 
@@ -35,6 +35,9 @@ function Backdrop() {
         vec3 col = mix(cStorm * 0.6, cEve, smoothstep(0.05, 0.85, r));          // stormy haze up high
         col += cSun * 0.22 * pow(1.0 - vUv.y, 3.0);                               // dusk glow low on the horizon
         col += cCloud * 0.05 * smoothstep(0.6, 0.0, abs(vUv.y - 0.35));
+        // the light source: a soft moon-like glow up in the top-left
+        float g = length((vUv - vec2(0.14, 0.88)) * vec2(1.6, 1.0));
+        col += vec3(1.0, 0.93, 0.92) * (0.55 * exp(-g * g * 90.0) + 0.16 * exp(-g * 7.0));
         gl_FragColor = vec4(col, 1.0);
       }`,
   }), [])
@@ -47,7 +50,7 @@ function Backdrop() {
   return <mesh ref={mesh} material={mat} renderOrder={-1}><planeGeometry /></mesh>
 }
 
-function Stage({ progress, onReveal, onLap }) {
+function Stage({ progress, onReveal, onLap, onPage }) {
   const { size, camera } = useThree()
   const H = 2 * CAM_Z1 * Math.tan(THREE.MathUtils.degToRad(FOV / 2))
   const W = H * (size.width / size.height)
@@ -67,16 +70,22 @@ function Stage({ progress, onReveal, onLap }) {
   const plan = useCallback((d, dt) => {
     const p = progress.current
     const s = d.scale, body = d.bodyLen
-    const mode = p < SPLIT ? 1 : 2
-    if (d.sHead === null) { d.mode = mode; d.sHead = mode === 1 ? -1.5 * s : -body - 1.5 * s } // glide in from off-screen
-    else if (mode !== d.mode) { // swap scenes while the dragon is off-screen in both
+    const exit1 = path1.exitS + 0.75 * body // 3/4 of the body past the right edge
+    const in2 = path2.headInS // head already in view on page 2
+    const want = p < SPLIT ? 1 : 2
+    let mode = d.sHead === null ? want : d.mode
+    // going forward we switch the instant the dragon is 3/4 off page 1 (not just when the scroll says so)
+    if (want === 1) mode = 1
+    else if (d.mode === 1 && d.sHead >= exit1) mode = 2
+    if (d.sHead === null) { d.mode = mode; d.sHead = mode === 1 ? -1.5 * s : in2 } // glide in
+    else if (mode !== d.mode) { // switch pages: page 1 → 2 picks up with the head showing; 2 → 1 resumes at the exit
       d.mode = mode
-      d.sHead = mode === 2 ? -body - 1.5 * s : path1.length + body + 2 * s
+      d.sHead = mode === 2 ? in2 : exit1
       if (mode === 1) { d.loop = 0; d.enter = 0 }
     }
     if (mode === 1) {
       d.path = path1
-      d.target = THREE.MathUtils.lerp(path1.length * 0.085, path1.length + body + 2 * s, clamp01(p / P1_END))
+      d.target = want === 2 ? exit1 + 0.3 * body : THREE.MathUtils.lerp(path1.length * 0.085, exit1, clamp01(p / SPLIT))
     } else {
       d.path = path2
       d.enter = clamp01((p - SPLIT) / (ENTER_END - SPLIT))
@@ -84,7 +93,7 @@ function Stage({ progress, onReveal, onLap }) {
       // (down → clockwise, up → backwards; it only moves when you scroll)
       d.loop = clamp01((p - WORK_START) / (1 - WORK_START)) * WORK.length * path2.circ
       d.lapStart = path2.leadLen + body + 0.1 * path2.circ // head position when the swoop ends
-      d.target = THREE.MathUtils.lerp(-body - 1.5 * s, d.lapStart, d.enter) + d.loop
+      d.target = THREE.MathUtils.lerp(in2, d.lapStart, d.enter) + d.loop
     }
     d.lastP = p
   }, [path1, path2, progress])
@@ -92,11 +101,13 @@ function Stage({ progress, onReveal, onLap }) {
   const us = useMemo(() => INTRO_SECTIONS.map((sec) => path1.nearestU(sec.rx ?? sec.x, sec.ry ?? sec.y)), [path1])
   const last = useRef('')
   const lastLap = useRef(-1)
-  const pan = useRef(progress.current >= SPLIT ? 1 : 0)
+  const lastPage = useRef(1)
+  const pan = useRef(0)
   useFrame((_, dt) => {
     const p = progress.current
     // which page we're on is binary; the camera just makes one quick timed move between them
-    pan.current = THREE.MathUtils.damp(pan.current, p >= SPLIT ? 1 : 0, 7, Math.min(dt, 0.05))
+    pan.current = THREE.MathUtils.damp(pan.current, drive.mode === 2 ? 1 : 0, 7, Math.min(dt, 0.05))
+    if (drive.mode !== lastPage.current) { lastPage.current = drive.mode; onPage(drive.mode) }
     const e = pan.current
     camera.position.set(THREE.MathUtils.lerp(0, X2, e), 0, THREE.MathUtils.lerp(CAM_Z1, CAM_Z2, e))
     if (drive.sHead === null) return
@@ -114,11 +125,12 @@ function Stage({ progress, onReveal, onLap }) {
       <color attach="background" args={['#192231']} />
       <Backdrop />
       <ambientLight intensity={0.22} />
-      <directionalLight position={[-12, 14, 20]} intensity={2.0} color="#f1e9ea" />
+      <directionalLight position={[-16, 18, 20]} intensity={3.6} color="#fff1ec" />
       <directionalLight position={[10, -6, -18]} intensity={4} color="#985E6D" />
       <directionalLight position={[-14, 4, -10]} intensity={2} color="#98878F" />
       <Environment resolution={128} frames={1}>
-        <Lightformer form="rect" intensity={2.2} position={[0, 8, -4]} scale={[24, 2, 1]} />
+        <Lightformer form="rect" intensity={3} position={[0, 8, -4]} scale={[24, 2, 1]} />
+        <Lightformer form="circle" intensity={4} position={[-10, 10, 10]} scale={6} color="#fff1ec" />
         <Lightformer form="rect" intensity={1.4} position={[-10, 2, 6]} scale={[4, 12, 1]} color="#98878F" />
         <Lightformer form="rect" intensity={1.2} position={[10, -3, 6]} scale={[6, 6, 1]} color="#985E6D" />
       </Environment>
@@ -140,6 +152,7 @@ export default function DragonIntro() {
   const [p, setP] = useState(0)
   const [revealed, setRevealed] = useState(() => INTRO_SECTIONS.map(() => false))
   const [workIndex, setWorkIndex] = useState(0)
+  const [page, setPage] = useState(1)
 
   const onScroll = useCallback((e) => {
     const el = e.currentTarget
@@ -154,7 +167,7 @@ export default function DragonIntro() {
   }, [])
   const jumpToWork = useCallback((i = 0) => scrollToP(WORK_START + ((i + 0.5) / WORK.length) * (1 - WORK_START)), [scrollToP])
 
-  const page2 = p >= SPLIT
+  const page2 = page === 2
 
   return (
     <div className="intro" ref={scroller} onScroll={onScroll}>
@@ -166,7 +179,7 @@ export default function DragonIntro() {
           gl={{ antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
         >
           <Suspense fallback={null}>
-            <Stage progress={progress} onReveal={setRevealed} onLap={setWorkIndex} />
+            <Stage progress={progress} onReveal={setRevealed} onLap={setWorkIndex} onPage={setPage} />
             <EffectComposer multisampling={4}>
               <Bloom mipmapBlur intensity={0.85} luminanceThreshold={0.62} luminanceSmoothing={0.2} radius={0.72} />
               <Vignette offset={0.3} darkness={0.5} />

@@ -14,7 +14,7 @@ export const PATH_POINTS = [
  * it starts far back on the right and comes toward the viewer as it sweeps left, staying close along the bottom.
  * camZ = camera distance; each point is pushed back/forward in z and rescaled in x/y so it projects to the same spot.
  */
-export function makeWorldPath(width, height, camZ = 40, zFar = -16, zNear = 9) {
+export function makeWorldPath(width, height, camZ = 40, zFar = -26, zNear = 15) {
   const n = PATH_POINTS.length
   const pts = PATH_POINTS.map(([x, y], i) => {
     const t = Math.min(1, i / (n * 0.62)) // reach the front by the left-hand loop
@@ -46,7 +46,17 @@ export function makeWorldPath(width, height, camZ = 40, zFar = -16, zNear = 9) {
     }
     return best
   }
-  return { curve, length, sample, nearestU }
+  // arc length where the flight crosses the screen's right edge for the last time (on its way out)
+  const exitS = (() => {
+    const q = new THREE.Vector3(), tt = new THREE.Vector3()
+    for (let i = 400; i >= 0; i--) {
+      const s = (i / 400) * length
+      sample(s, q, tt)
+      if ((q.x * camZ) / (camZ - q.z) / width + 0.5 < 1) return s
+    }
+    return length
+  })()
+  return { curve, length, sample, nearestU, exitS }
 }
 
 /**
@@ -80,5 +90,10 @@ export function makeCirclePath(cx, cy, r, left) {
   const ring = new THREE.CatmullRomCurve3(
     Array.from({ length: 96 }, (_, i) => { const th = th0 - (i / 96) * Math.PI * 2; return new THREE.Vector3(cx + r * Math.cos(th), cy + r * Math.sin(th), 0) }),
     true, 'centripetal')
-  return { sample, leadLen, circ, ring, length: leadLen, cx, cy, r }
+  const headInS = (() => {
+    const q = new THREE.Vector3(), tt = new THREE.Vector3()
+    for (let i = 0; i <= 300; i++) { const s = (i / 300) * leadLen; sample(s, q, tt); if (q.x > left + r * 0.45) return s }
+    return 0
+  })()
+  return { sample, leadLen, circ, ring, length: leadLen, cx, cy, r, headInS }
 }
