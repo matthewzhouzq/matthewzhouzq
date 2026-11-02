@@ -78,7 +78,7 @@
 .work-eyebrow { position: absolute; top: 74px; left: clamp(18px, 3vw, 36px); font: 400 10px/1 var(--mono); letter-spacing: 0.3em;
   text-transform: uppercase; color: rgba(243, 241, 236, 0.5); }
 .work-panel { position: absolute; left: 51.5%; top: 51%; transform: translate(-50%, -50%); width: min(420px, 40vw);
-  color: #f3f1ec; animation: work-in 0.7s var(--ease) both; }
+  color: #f3f1ec; animation: work-in 0.7s var(--ease) both; text-shadow: 0 1px 14px rgba(25, 34, 49, 0.95), 0 0 2px rgba(25, 34, 49, 0.9); }
 @keyframes work-in { from { opacity: 0; transform: translate(-50%, calc(-50% + 14px)); filter: blur(6px); } to { opacity: 1; transform: translate(-50%, -50%); filter: none; } }
 .work-kicker { display: flex; align-items: center; gap: 8px; font: 400 10px/1 var(--mono); letter-spacing: 0.2em; text-transform: uppercase; color: rgba(243, 241, 236, 0.6); }
 .work-kicker span { color: rgba(243, 241, 236, 0.4); }
