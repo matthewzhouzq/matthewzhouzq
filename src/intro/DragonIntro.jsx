@@ -72,19 +72,20 @@ function Stage({ progress, onReveal }) {
     else if (mode !== d.mode) { // swap scenes while the dragon is off-screen in both
       d.mode = mode
       d.sHead = mode === 2 ? -body - 1.5 * s : path1.length + body + 2 * s
-      if (mode === 1) { d.loop = 0; d.enter = 0 }
+      if (mode === 1) { d.loop = 0; d.enter = 0; d.dir = 1 }
     }
     if (mode === 1) {
       d.path = path1
       d.target = THREE.MathUtils.lerp(path1.length * 0.085, path1.length + body + 2 * s, clamp01(p / P1_END))
     } else {
       d.path = path2
-      // entrance only ever progresses forward (scrolling back up a bit won't reverse it)
-      d.enter = Math.max(d.enter || 0, clamp01((p - SPLIT) / (ENTER_END - SPLIT)))
+      d.enter = clamp01((p - SPLIT) / (ENTER_END - SPLIT))
       if (d.enter >= 1) {
-        // speed comes from how fast you scroll — either direction — always clockwise; slow drift when idle
-        const scrolled = Math.min(0.02, Math.abs(p - (d.lastP ?? p)))
-        d.loop += dt * (path2.circ / 22) + scrolled * path2.circ * 7
+        // scroll down → clockwise, scroll up → backwards; speed follows how fast you scroll.
+        // When idle it drifts slowly in the last direction you scrolled.
+        const dp = THREE.MathUtils.clamp(p - (d.lastP ?? p), -0.02, 0.02)
+        if (dp !== 0) d.dir = Math.sign(dp)
+        d.loop += dt * (path2.circ / 22) * (d.dir ?? 1) + dp * path2.circ * 7
       }
       d.target = THREE.MathUtils.lerp(-body - 1.5 * s, path2.leadLen + 0.2 * path2.circ, d.enter) + d.loop
     }
