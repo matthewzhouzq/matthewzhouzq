@@ -12,14 +12,10 @@ export default function Loader() {
 
   useEffect(() => {
     if (!active && progress >= 100) {
-      const t = setTimeout(() => {
-        setLoaded(true)
-        // arriving from the dragon intro: the visitor already chose to come in
-        if (useStore.getState().entered && !useStore.getState().ready) setReady()
-      }, 300)
+      const t = setTimeout(() => setLoaded(true), 300)
       return () => clearTimeout(t)
     }
-  }, [active, progress, setReady])
+  }, [active, progress])
 
   useEffect(() => {
     if (ready) {

@@ -158,7 +158,7 @@ export const INTERESTS = [
 // ─────────────────────────────────────────────────────────────
 //  Dragon intro — the white text the dragon flies over.
 //  x / y place each block on screen (0→1, from top-left), along the flight path.
-//  from: 'top' | 'bottom' — which edge is pinned (bottom-pinned blocks expand upward).
+//  Blocks always open downward. rx / ry (optional) = the point on the flight path that reveals the block.
 // ─────────────────────────────────────────────────────────────
 export const COOP_STATUS = {
   headline: 'Looking for a co-op',
@@ -168,7 +168,7 @@ export const COOP_STATUS = {
 export const INTRO_SECTIONS = [
   {
     id: 'about', kicker: 'about', title: PROFILE.name, sub: PROFILE.role,
-    x: 0.79, y: 0.4, from: 'top', align: 'left',
+    x: 0.79, y: 0.4, align: 'left',
     body: 'I build software that touches hardware — RAG tooling and lab automation at Ciena, driverless perception with McGill Formula SAE, and 3D on the web (like this dragon).',
     links: [
       { label: 'GitHub', href: 'https://github.com/matthewzhouzq' },
@@ -177,29 +177,72 @@ export const INTRO_SECTIONS = [
   },
   {
     id: 'experience', kicker: 'experience', title: 'Ciena', sub: 'Reliability Engineer Intern · 2026',
-    x: 0.3, y: 0.46, from: 'top', align: 'left',
+    x: 0.3, y: 0.46, align: 'left',
     list: 'chapters', // filled from CHAPTERS
-    links: [{ label: 'Open the book on my desk', desk: 'book' }],
+    links: [{ label: 'Résumé (PDF)', href: PROFILE.resumePdf }],
   },
   {
     id: 'projects', kicker: 'projects', title: 'Things I’ve built', sub: 'Nodality.ai · navigator.ai · Tempora',
-    x: 0.155, y: 0.3, from: 'top', align: 'right',
+    x: 0.155, y: 0.3, align: 'right',
     list: 'projects', // filled from PROJECTS
-    links: [{ label: 'See them on the laptop', desk: 'laptop' }],
+    links: [{ label: 'See them in detail', to: 'work' }],
   },
   {
     id: 'contact', kicker: 'résumé + contact', title: 'Say hello', sub: 'matthewzhou.contacts@gmail.com',
-    x: 0.11, y: 0.745, from: 'bottom', align: 'left',
+    x: 0.25, y: 0.56, rx: 0.16, ry: 0.81, align: 'left',
     list: 'contacts', // filled from CONTACTS
     links: [{ label: 'Résumé (PDF)', href: PROFILE.resumePdf }],
   },
   {
     id: 'coop', kicker: 'co-op status', title: COOP_STATUS.headline, sub: COOP_STATUS.detail,
-    x: 0.47, y: 0.965, from: 'bottom', align: 'left',
+    x: 0.66, y: 0.66, rx: 0.6, ry: 0.83, align: 'left',
     body: 'Open to software, platform and AI-infrastructure teams. Happy to talk about anything on this page.',
     links: [
       { label: 'Email me', href: 'mailto:matthewzhou.contacts@gmail.com' },
-      { label: 'Enter the workspace', desk: 'home' },
+      { label: 'See what I’m building', to: 'work' },
     ],
   },
+]
+
+// ─────────────────────────────────────────────────────────────
+//  Scene 2 — what I'm building. The dragon circles these as you scroll.
+//  status: 'now' (in progress) or a year range for finished work.
+// ─────────────────────────────────────────────────────────────
+export const WORK = [
+  {
+    id: 'cura', status: 'now', title: 'Cura', kind: 'iOS app',
+    summary: 'A virtual wardrobe and fashion-discovery app for iOS.',
+    points: [
+      'Prototyped a 3D wardrobe in Three.js.',
+      'Built and tested a phone-frame wireframe on real devices.',
+      'Exploring the Spotify Web API so posts can be tagged with music.',
+    ],
+    stack: ['iOS', 'Three.js', 'Spotify Web API'],
+    links: [],
+  },
+  {
+    id: 'oinky', status: 'now', title: 'Oinky', kind: 'robot',
+    summary: 'A one-eyed baby pig robot, inspired by Pollen’s open-source Microduck.',
+    points: [
+      'Simulating it first, the software-engineer way, before building the real one.',
+      'My route into robotics — learning it from the ground up.',
+    ],
+    stack: ['Simulation', 'Robotics'],
+    links: [],
+  },
+  {
+    id: 'site', status: 'now', title: 'This dragon', kind: 'website',
+    summary: 'A dragon rigged and animated in Blender, flown live in the browser as you scroll.',
+    points: [
+      'Spine traced automatically from the sculpt, then rigged and skinned.',
+      'Scroll drives a follow-the-leader flight with a wave down the body.',
+    ],
+    stack: ['Blender', 'three.js', 'React Three Fiber'],
+    links: [{ label: 'Source', href: 'https://github.com/matthewzhouzq/matthewzhouzq' }],
+  },
+  ...PROJECTS.map((p) => ({
+    id: p.id, status: p.year, title: p.title, kind: 'project',
+    summary: p.tagline, points: [], stack: p.stack,
+    links: [p.github && { label: 'GitHub', href: p.github }].filter(Boolean),
+  })),
 ]

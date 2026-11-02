@@ -9,12 +9,12 @@ const NB = 30 // spine bones, Spine_00 (behind the head) → Spine_29 (tail tip)
 /** Glossy black scales: clearcoat + the baked normal map, with a faint glow along scale ridges. */
 function makeScaleMaterial(normalMap) {
   const m = new THREE.MeshPhysicalMaterial({
-    color: '#060608', roughness: 0.34, metalness: 0.2,
+    color: '#08080b', roughness: 0.34, metalness: 0.2,
     clearcoat: 1, clearcoatRoughness: 0.12, normalMap, normalScale: new THREE.Vector2(1.4, 1.4),
-    sheen: 0.6, sheenColor: new THREE.Color('#3a4a5a'), sheenRoughness: 0.4,
+    sheen: 0.6, sheenColor: new THREE.Color('#6e5f6a'), sheenRoughness: 0.4,
   })
   m.onBeforeCompile = (shader) => {
-    shader.uniforms.uGlow = { value: new THREE.Color('#8fd3ff').multiplyScalar(1.6) }
+    shader.uniforms.uGlow = { value: new THREE.Color('#c79aa6').multiplyScalar(1.5) }
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nuniform vec3 uGlow;')
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
@@ -27,7 +27,7 @@ function makeScaleMaterial(normalMap) {
   return m
 }
 
-export default function Dragon({ path, drive, progress }) {
+export default function Dragon({ drive, plan }) {
   const { scene } = useGLTF(DRAGON_URL, true)
 
   const rig = useMemo(() => {
@@ -37,7 +37,7 @@ export default function Dragon({ path, drive, progress }) {
       if (o.isMesh) {
         o.frustumCulled = false
         if (o.name.includes('Eye') || o.material?.name === 'DragonEye') {
-          o.material = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffb04a').multiplyScalar(6), toneMapped: false })
+          o.visible = false // no glowing eyes
         } else {
           o.material = makeScaleMaterial(o.material.normalMap)
         }
@@ -63,19 +63,17 @@ export default function Dragon({ path, drive, progress }) {
   useEffect(() => { group.current.scale.setScalar(drive.scale) }, [drive.scale])
 
   useFrame((state, delta) => {
-    if (!path) return
     const t = state.clock.elapsedTime
     const s = drive.scale
     const { bones, restQ, spineLen, headLen } = rig
     const { joints, ups, Y, Z } = tmp
     const bl = spineLen * s
-    // scroll → where the head is along the path (eased, so the flight glides instead of snapping)
-    const bodyLen = (headLen + NB * spineLen) * s
-    drive.bodyLen = bodyLen
-    const target = THREE.MathUtils.lerp(path.length * 0.085, path.length + bodyLen + 2 * s, progress.current)
-    if (drive.sHead === null) drive.sHead = -1.5 * s // first frame: start just off-screen right and glide in
+    // scroll → which path we're on and where the head should be (eased, so the flight glides instead of snapping)
+    drive.bodyLen = (headLen + NB * spineLen) * s
     const dt = Math.min(delta, 0.05)
-    const gap = target - drive.sHead
+    plan(drive, dt)
+    const path = drive.path
+    const gap = drive.target - drive.sHead
     drive.sHead += gap * (1 - Math.exp(-dt * 2.6))
     drive.wavePhase += dt * (3.4 + Math.min(7, Math.abs(gap) / s))
     const sh = drive.sHead // arc length of the head joint (world units)

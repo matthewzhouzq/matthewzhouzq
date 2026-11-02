@@ -32,3 +32,37 @@ export function makeWorldPath(width, height) {
   }
   return { curve, length, sample, nearestU, _p: p, _t: t }
 }
+
+/**
+ * Scene 2: swoop in from the left, rise over the top and settle into a clockwise circle (loops forever).
+ * cx, cy, r in world units; left = x of the scene's left edge.
+ */
+export function makeCirclePath(cx, cy, r, left) {
+  const th0 = (150 * Math.PI) / 180 // join the circle at its upper-left, heading up and right
+  const P0 = new THREE.Vector3(cx + r * Math.cos(th0), cy + r * Math.sin(th0), 0)
+  const T0 = new THREE.Vector3(Math.sin(th0), -Math.cos(th0), 0) // clockwise tangent
+  const lead = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(left - r * 1.4, cy - r * 0.05, 0),
+    new THREE.Vector3(left - r * 0.2, cy - r * 0.08, 0),
+    new THREE.Vector3(left + (P0.x - left) * 0.55, cy - r * 0.02, 0),
+    P0.clone().addScaledVector(T0, -r * 0.35),
+    P0.clone(),
+  ], false, 'centripetal')
+  const leadLen = lead.getLength()
+  const circ = 2 * Math.PI * r
+  const a = lead.getPointAt(0), ta = lead.getTangentAt(0)
+  const sample = (s, outP, outT) => {
+    if (s <= 0) { outT.copy(ta); outP.copy(a).addScaledVector(ta, s) }
+    else if (s < leadLen) { const u = s / leadLen; lead.getPointAt(u, outP); lead.getTangentAt(u, outT) }
+    else {
+      const th = th0 - (s - leadLen) / r
+      outP.set(cx + r * Math.cos(th), cy + r * Math.sin(th), 0)
+      outT.set(Math.sin(th), -Math.cos(th), 0)
+    }
+  }
+  // closed curve for the glowing ring the dragon leaves behind
+  const ring = new THREE.CatmullRomCurve3(
+    Array.from({ length: 96 }, (_, i) => { const th = th0 - (i / 96) * Math.PI * 2; return new THREE.Vector3(cx + r * Math.cos(th), cy + r * Math.sin(th), 0) }),
+    true, 'centripetal')
+  return { sample, leadLen, circ, ring, length: leadLen, cx, cy, r }
+}

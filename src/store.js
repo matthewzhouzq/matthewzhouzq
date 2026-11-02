@@ -8,16 +8,12 @@ export const useStore = create((set) => ({
   ready: false, // assets loaded + intro started
   introDone: false,
   timeT: NOW, // clock-wound time (decimal year)
-  // dragon intro → desk. '#desk' in the URL skips straight to the workspace.
-  entered: typeof window !== 'undefined' && window.location.hash === '#desk',
-  pendingFocus: null, // desk object to open once the desk intro finishes (from an intro link)
-  setEntered: (pendingFocus = null) => set({ entered: true, pendingFocus }),
 
   setFocus: (focus) => set({ focus, hovered: null }),
   setHovered: (hovered) => set({ hovered }),
   setReady: () => {
     set({ ready: true })
-    setTimeout(() => set((s) => ({ introDone: true, focus: s.pendingFocus ?? s.focus, pendingFocus: null })), 3400)
+    setTimeout(() => set({ introDone: true }), 3400)
   },
   setIntroDone: () => set({ introDone: true }),
   setTimeT: (timeT) => set({ timeT }),

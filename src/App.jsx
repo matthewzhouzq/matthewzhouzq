@@ -1,63 +1,13 @@
-import { Suspense, useEffect } from 'react'
-import { Canvas } from '@react-three/fiber'
-import * as THREE from 'three'
-import Scene from './scene/Scene'
-import Loader from './ui/Loader'
-import Hud from './ui/Hud'
-import Cursor from './ui/Cursor'
-import LaptopView from './ui/LaptopView'
-import PhoneView from './ui/PhoneView'
-import ResumeView from './ui/ResumeView'
-import ClockView from './ui/ClockView'
-import PlantView from './ui/PlantView'
-import BookView from './ui/BookView'
-import { useStore } from './store'
 import DragonIntro from './intro/DragonIntro'
+import Cursor from './ui/Cursor'
 
+// The whole site is the dragon: scene 1 (who I am) → camera pans → scene 2 (what I'm building).
+// The old 3D desk lives on in src/scene + src/ui but isn't mounted any more.
 export default function App() {
-  const focus = useStore((s) => s.focus)
-  const hovered = useStore((s) => s.hovered)
-  const setFocus = useStore((s) => s.setFocus)
-  const entered = useStore((s) => s.entered)
-  const setEntered = useStore((s) => s.setEntered)
-
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && setFocus(null)
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [setFocus])
-
-  if (!entered)
-    return (
-      <>
-        <DragonIntro onEnter={setEntered} />
-        <Cursor />
-      </>
-    )
-
   return (
-    <div className={`app ${focus ? 'is-focused' : ''} ${hovered ? 'is-hovering' : ''}`}>
-      <Canvas
-        className="canvas"
-        shadows={{ type: THREE.PCFShadowMap }}
-        dpr={[1, 1.75]}
-        camera={{ fov: 32, near: 0.02, far: 30, position: [3.4, 2.4, 4.2] }}
-        gl={{ antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
-      >
-        <Suspense fallback={null}>
-          <Scene />
-        </Suspense>
-      </Canvas>
-
-      <Hud />
-      <LaptopView open={focus === 'laptop'} />
-      <PhoneView open={focus === 'phone'} />
-      <ResumeView open={focus === 'resume'} />
-      <ClockView open={focus === 'clock'} />
-      <PlantView open={focus === 'plant'} />
-      <BookView open={focus === 'book'} />
-      <Loader />
+    <>
+      <DragonIntro />
       <Cursor />
-    </div>
+    </>
   )
 }
