@@ -9,28 +9,44 @@ export const PATH_POINTS = [
   [0.41, 0.72], [0.5, 0.73], [0.57, 0.81], [0.68, 0.86], [0.8, 0.86], [0.92, 0.83], [1.24, 0.81],
 ]
 
-/** World-space curve for the current viewport (z = 0 plane). */
-export function makeWorldPath(width, height) {
-  const pts = PATH_POINTS.map(([x, y]) => new THREE.Vector3((x - 0.5) * width, (0.5 - y) * height, 0))
+/**
+ * World-space flight curve. The on-screen line matches PATH_POINTS exactly, but the flight also moves in depth:
+ * it starts far back on the right and comes toward the viewer as it sweeps left, staying close along the bottom.
+ * camZ = camera distance; each point is pushed back/forward in z and rescaled in x/y so it projects to the same spot.
+ */
+export function makeWorldPath(width, height, camZ = 40, zFar = -16, zNear = 9) {
+  const n = PATH_POINTS.length
+  const pts = PATH_POINTS.map(([x, y], i) => {
+    const t = Math.min(1, i / (n * 0.62)) // reach the front by the left-hand loop
+    const e = t * t * (3 - 2 * t)
+    const z = zFar + (zNear - zFar) * e
+    const k = (camZ - z) / camZ // keep the same screen position at this depth
+    return new THREE.Vector3((x - 0.5) * width * k, (0.5 - y) * height * k, z)
+  })
   const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal')
   const length = curve.getLength()
   const a = curve.getPointAt(0), b = curve.getPointAt(1)
   const ta = curve.getTangentAt(0), tb = curve.getTangentAt(1)
-  const p = new THREE.Vector3(), t = new THREE.Vector3()
+  const p = new THREE.Vector3()
   // point / tangent at arc length s, extended straight past both ends
   const sample = (s, outP, outT) => {
     if (s <= 0) { outT.copy(ta); outP.copy(a).addScaledVector(ta, s) }
     else if (s >= length) { outT.copy(tb); outP.copy(b).addScaledVector(tb, s - length) }
     else { const u = s / length; curve.getPointAt(u, outP); curve.getTangentAt(u, outT) }
   }
-  // nearest arc-fraction to a normalised screen point (used to time the text reveals)
+  // nearest arc-fraction to a normalised screen point (compared on screen, so depth doesn't skew it)
   const nearestU = (nx, ny) => {
-    const q = new THREE.Vector3((nx - 0.5) * width, (0.5 - ny) * height, 0)
     let best = 0, bd = Infinity
-    for (let i = 0; i <= 400; i++) { curve.getPointAt(i / 400, p); const d = p.distanceToSquared(q); if (d < bd) { bd = d; best = i / 400 } }
+    for (let i = 0; i <= 400; i++) {
+      curve.getPointAt(i / 400, p)
+      const k = camZ / (camZ - p.z)
+      const sx = (p.x * k) / width + 0.5, sy = 0.5 - (p.y * k) / height
+      const d = (sx - nx) ** 2 + (sy - ny) ** 2
+      if (d < bd) { bd = d; best = i / 400 }
+    }
     return best
   }
-  return { curve, length, sample, nearestU, _p: p, _t: t }
+  return { curve, length, sample, nearestU }
 }
 
 /**

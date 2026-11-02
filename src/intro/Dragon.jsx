@@ -6,12 +6,12 @@ import * as THREE from 'three'
 export const DRAGON_URL = `${import.meta.env.BASE_URL}models/dragon.glb`
 const NB = 30 // spine bones, Spine_00 (behind the head) → Spine_29 (tail tip)
 
-/** Glossy black scales: clearcoat + the baked normal map, with a faint glow along scale ridges. */
+/** Satin black scales: soft coat + the baked normal map, with a faint glow along scale ridges. */
 function makeScaleMaterial(normalMap) {
   const m = new THREE.MeshPhysicalMaterial({
-    color: '#08080b', roughness: 0.34, metalness: 0.2,
-    clearcoat: 1, clearcoatRoughness: 0.12, normalMap, normalScale: new THREE.Vector2(1.4, 1.4),
-    sheen: 0.6, sheenColor: new THREE.Color('#6e5f6a'), sheenRoughness: 0.4,
+    color: '#08080b', roughness: 0.55, metalness: 0.08,
+    clearcoat: 0.3, clearcoatRoughness: 0.45, normalMap, normalScale: new THREE.Vector2(1.3, 1.3),
+    sheen: 0.12, sheenColor: new THREE.Color('#6e5f6a'), sheenRoughness: 0.6,
   })
   m.onBeforeCompile = (shader) => {
     shader.uniforms.uGlow = { value: new THREE.Color('#c79aa6').multiplyScalar(1.5) }
@@ -21,7 +21,7 @@ function makeScaleMaterial(normalMap) {
       #ifdef USE_NORMALMAP_TANGENTSPACE
         float ridge = clamp(length(mapN.xy) * 1.6, 0.0, 1.0);
         float rim = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 2.5);
-        totalEmissiveRadiance += uGlow * (smoothstep(0.35, 0.9, ridge) * 0.22 + rim * 0.18);
+        totalEmissiveRadiance += uGlow * (smoothstep(0.45, 0.95, ridge) * 0.08 + rim * 0.1);
       #endif`)
   }
   return m
@@ -37,7 +37,22 @@ export default function Dragon({ drive, plan }) {
       if (o.isMesh) {
         o.frustumCulled = false
         if (o.name.includes('Eye') || o.material?.name === 'DragonEye') {
-          o.visible = false // no glowing eyes
+          // tiny bright white dots for eyes, same light as the trail
+          const pos = o.geometry.attributes.position
+          const sides = [[], []] // left / right eye, split by which side of the head they sit on
+          for (let i = 0; i < pos.count; i++) sides[pos.getZ(i) > 0 ? 0 : 1].push(i)
+          for (const idx of sides) {
+            if (!idx.length) continue
+            const c = new THREE.Vector3()
+            for (const i of idx) c.add(new THREE.Vector3().fromBufferAttribute(pos, i))
+            c.divideScalar(idx.length)
+            for (const i of idx) {
+              const v = new THREE.Vector3().fromBufferAttribute(pos, i).sub(c).multiplyScalar(0.32).add(c)
+              pos.setXYZ(i, v.x, v.y, v.z)
+            }
+          }
+          pos.needsUpdate = true
+          o.material = new THREE.MeshBasicMaterial({ color: new THREE.Color('#fff4f6').multiplyScalar(2.2), toneMapped: false })
         } else {
           o.material = makeScaleMaterial(o.material.normalMap)
         }

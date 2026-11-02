@@ -168,7 +168,7 @@ export const COOP_STATUS = {
 export const INTRO_SECTIONS = [
   {
     id: 'about', kicker: 'about', title: PROFILE.name, sub: PROFILE.role,
-    x: 0.79, y: 0.4, align: 'left',
+    x: 0.95, y: 0.17, rx: 0.86, ry: 0.23, align: 'right',
     body: 'I build software that touches hardware — RAG tooling and lab automation at Ciena, driverless perception with McGill Formula SAE, and 3D on the web (like this dragon).',
     links: [
       { label: 'GitHub', href: 'https://github.com/matthewzhouzq' },
@@ -177,25 +177,25 @@ export const INTRO_SECTIONS = [
   },
   {
     id: 'experience', kicker: 'experience', title: 'Ciena', sub: 'Reliability Engineer Intern · 2026',
-    x: 0.3, y: 0.46, align: 'left',
+    x: 0.54, y: 0.12, rx: 0.6, ry: 0.6, align: 'left',
     list: 'chapters', // filled from CHAPTERS
     links: [{ label: 'Résumé (PDF)', href: PROFILE.resumePdf }],
   },
   {
     id: 'projects', kicker: 'projects', title: 'Things I’ve built', sub: 'Nodality.ai · navigator.ai · Tempora',
-    x: 0.155, y: 0.3, align: 'right',
+    x: 0.075, y: 0.16, rx: 0.24, ry: 0.32, align: 'left',
     list: 'projects', // filled from PROJECTS
     links: [{ label: 'See them in detail', to: 'work' }],
   },
   {
     id: 'contact', kicker: 'résumé + contact', title: 'Say hello', sub: 'matthewzhou.contacts@gmail.com',
-    x: 0.25, y: 0.56, rx: 0.16, ry: 0.81, align: 'left',
+    x: 0.24, y: 0.46, rx: 0.1, ry: 0.65, align: 'left',
     list: 'contacts', // filled from CONTACTS
     links: [{ label: 'Résumé (PDF)', href: PROFILE.resumePdf }],
   },
   {
     id: 'coop', kicker: 'co-op status', title: COOP_STATUS.headline, sub: COOP_STATUS.detail,
-    x: 0.66, y: 0.66, rx: 0.6, ry: 0.83, align: 'left',
+    x: 0.81, y: 0.75, rx: 0.8, ry: 0.86, align: 'left',
     body: 'Open to software, platform and AI-infrastructure teams. Happy to talk about anything on this page.',
     links: [
       { label: 'Email me', href: 'mailto:matthewzhou.contacts@gmail.com' },
