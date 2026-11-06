@@ -1,3 +1,3 @@
-# Matthew Zhou 
-
-McGill Software Engineering Co-op 2025-2029
+hi, im matthew
+  , swe @ mcgill
+  , [this my portfolio](https://matthewzhou.ca/)
