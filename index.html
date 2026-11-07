@@ -16,7 +16,7 @@ img { max-width: 100%; }
 <meta name="description" content="Matthew Zhou, software engineering at McGill.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Silkscreen:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Doto:wght@900&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600&text=%E5%91%A8%E5%85%A8&display=swap">
 <style>
 /* layout: one terminal column. status bar, whoami, a phosphor scope with the dragon, ls + git log side by side, a live prompt. */
@@ -31,7 +31,7 @@ img { max-width: 100%; }
   --amber: #f2c46d;
   --track: #0b1f14;
   --thumb: #2c6a48;
-  --display: 'Silkscreen', 'IBM Plex Mono', ui-monospace, monospace;
+  --display: 'Doto', 'IBM Plex Mono', ui-monospace, monospace;
   --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --han: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
   --glow: none;
@@ -88,8 +88,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 32px 48px; align-items: end; }
 .id { display: flex; flex-direction: column; gap: 10px; min-width: 0; position: relative; }
 .name {
-  margin: 0; font-family: var(--display); font-weight: 700;
-  font-size: clamp(42px, 8vw, 100px); line-height: 1; letter-spacing: 0;
+  margin: 0; font-family: var(--display); font-weight: 900;
+  font-size: clamp(50px, 9.5vw, 118px); line-height: 0.92; letter-spacing: -0.01em;
   display: flex; flex-direction: column; color: var(--hot);
 }
 .name .row2 { display: flex; align-items: center; gap: 0.18em; }
