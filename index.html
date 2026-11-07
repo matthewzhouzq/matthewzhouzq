@@ -1,16 +1,609 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Matthew Zhou</title>
-    <meta name="description" content="Matthew Zhou — software engineering. A dragon, after hours." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Matthew Zhou</title>
+<meta property="og:title" content="Matthew Zhou">
+<meta property="og:description" content="Matthew Zhou, software engineering at McGill.">
+<meta name="theme-color" content="#040906">
+<style>
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<meta name="description" content="Matthew Zhou, software engineering at McGill.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Silkscreen:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600&text=%E5%91%A8%E5%85%A8&display=swap">
+<style>
+/* layout: one terminal column. status bar, whoami, a phosphor scope with the dragon, ls + git log side by side, a live prompt. */
+:root {
+  color-scheme: dark;
+  --bg: #040906;
+  --panel: #06110b;
+  --phos: #8df5b5;
+  --dim: #5f9f7d;
+  --faint: rgba(141, 245, 181, 0.14);
+  --hot: #e6fff0;
+  --amber: #f2c46d;
+  --track: #0b1f14;
+  --thumb: #2c6a48;
+  --display: 'Silkscreen', 'IBM Plex Mono', ui-monospace, monospace;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --han: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+  --glow: none;
+}
+html.crt { --glow: 0 0 7px rgba(141, 245, 181, 0.38); }
+html { scrollbar-color: var(--thumb) var(--track); }
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--track); }
+::-webkit-scrollbar-thumb { background: var(--thumb); border: 3px solid var(--track); }
+::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+::-webkit-scrollbar-button { display: none; height: 0; }
+::-webkit-scrollbar-corner { background: var(--track); }
+body {
+  background: var(--bg);
+  color: var(--phos);
+  font: 14px/1.6 var(--mono);
+  text-shadow: var(--glow);
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--phos); color: var(--bg); text-shadow: none; }
+a { color: var(--phos); text-underline-offset: 3px; text-decoration-color: var(--dim); }
+a:hover { color: var(--hot); text-decoration-color: var(--hot); }
+:focus-visible { outline: 1px solid var(--hot); outline-offset: 3px; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+/* status bar */
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--phos); color: var(--bg); text-shadow: none;
+  font-size: 12px; padding-block: 3px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--phos); }
+.bar-in { max-width: 1120px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 4px 18px; justify-content: space-between; align-items: center; }
+.bar-in span, .bar-in button { white-space: nowrap; }
+.bar .win { background: var(--bg); color: var(--phos); padding: 0 6px; }
+.bar button { padding: 2px 6px; min-height: 24px; }
+.bar button[aria-pressed="true"] { background: var(--bg); color: var(--phos); }
+.bar-r { display: flex; gap: 14px; align-items: center; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+.wrap {
+  max-width: 1120px; margin: 0 auto;
+  padding-block: 40px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 40px;
+}
+.prompt { margin: 0; color: var(--dim); font-size: 13px; }
+.prompt b { color: var(--phos); font-weight: 500; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 32px 48px; align-items: end; }
+.id { display: flex; flex-direction: column; gap: 10px; min-width: 0; position: relative; }
+.name {
+  margin: 0; font-family: var(--display); font-weight: 700;
+  font-size: clamp(42px, 8vw, 100px); line-height: 1; letter-spacing: 0;
+  display: flex; flex-direction: column; color: var(--hot);
+}
+.name .row2 { display: flex; align-items: center; gap: 0.18em; }
+.han {
+  font-family: var(--han); font-weight: 600; font-size: 0.5em; line-height: 1; letter-spacing: 0.04em;
+  color: var(--phos); padding: 0.06em 0.12em; border: 1px solid var(--faint);
+}
+.han:hover, .han:focus-visible { background: var(--phos); color: var(--bg); text-shadow: none; }
+.name .row2 { position: relative; align-self: flex-start; }
+.zhou-note {
+  position: absolute; left: calc(100% + 14px); top: 50%; z-index: 3; width: 250px;
+  padding: 8px 10px; font: 400 12px/1.5 var(--mono); letter-spacing: 0; color: var(--bg); background: var(--phos); text-shadow: none;
+  opacity: 0; transform: translate(-4px, -50%); pointer-events: none; transition: opacity .15s, transform .15s;
+}
+.row2:has(.han:hover) .zhou-note, .row2:has(.han:focus-visible) .zhou-note { opacity: 1; transform: translate(0, -50%); }
+.tag { margin: 6px 0 0; max-width: 58ch; color: var(--phos); }
+.tag::after { content: "█"; margin-left: 4px; animation: blink 1.05s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.facts { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 18px; font-size: 13px; }
+.facts dt { color: var(--dim); }
+.facts dd { margin: 0; min-width: 0; }
+.dot { display: inline-block; width: 7px; height: 7px; background: var(--amber); margin-right: 6px; vertical-align: 1px; box-shadow: 0 0 8px var(--amber); animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+.open { color: var(--amber); text-shadow: none; }
+
+/* the scope */
+.scope { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.modes { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 12px; color: var(--dim); }
+.seg { display: flex; border: 1px solid var(--faint); }
+.seg button { padding: 6px 14px; min-height: 32px; color: var(--dim); }
+.seg button:hover { color: var(--hot); }
+.seg button[aria-pressed="true"] { background: var(--phos); color: var(--bg); text-shadow: none; }
+.screen {
+  position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 8.2;
+  background: var(--panel); border: 1px solid var(--faint); overflow: hidden;
+}
+.screen canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+html.crt .screen canvas { image-rendering: pixelated; }
+.grat {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--faint) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--faint) 1px, transparent 1px);
+  background-size: 10% 12.5%;
+  background-position: -1px -1px;
+  opacity: .55;
+}
+.grat::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  background: repeating-linear-gradient(to right, var(--dim) 0 1px, transparent 1px 2%);
+  opacity: .6;
+}
+.corner { position: absolute; width: 18px; height: 18px; border: 1px solid var(--phos); pointer-events: none; }
+.c-tl { top: 8px; left: 8px; border-right: 0; border-bottom: 0; }
+.c-tr { top: 8px; right: 8px; border-left: 0; border-bottom: 0; }
+.c-bl { bottom: 8px; left: 8px; border-right: 0; border-top: 0; }
+.c-br { bottom: 8px; right: 8px; border-left: 0; border-top: 0; }
+.ro { position: absolute; font-size: 13px; line-height: 1.45; color: var(--phos); pointer-events: none; font-variant-numeric: tabular-nums; }
+.ro-tl { top: 12px; left: 34px; }
+.ro .score { font-size: 24px; line-height: 1.1; font-weight: 600; color: var(--hot); display: inline-block; transition: transform .15s; }
+.ro .score.bump { transform: scale(1.25); }
+.ro .glob { color: var(--phos); }
+.ro-tr { top: 12px; right: 34px; text-align: right; }
+.ro-bl { bottom: 12px; left: 34px; }
+.ro-br { bottom: 12px; right: 34px; text-align: right; color: var(--dim); }
+.ro .k { color: var(--dim); }
+.reticle {
+  position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; pointer-events: none;
+  left: 50%; top: 50%; opacity: .7;
+}
+.reticle::before, .reticle::after { content: ""; position: absolute; background: var(--amber); }
+.reticle::before { left: 10px; top: 0; width: 1px; height: 22px; }
+.reticle::after { top: 10px; left: 0; height: 1px; width: 22px; }
+
+.screen canvas, .screen .grat, .screen .ro, .screen .corner { transition: filter .45s ease, opacity .45s ease; }
+.screen.paused canvas, .screen.paused .grat, .screen.paused .ro, .screen.paused .corner, .screen.paused .spawn { filter: blur(7px); opacity: .75; }
+.spawn.bomb { --c: var(--amber); }
+.screen::after { content: ""; position: absolute; inset: 0; background: var(--amber); opacity: 0; pointer-events: none; }
+.screen.boom::after { animation: flash .5s ease-out; }
+.screen.boom { animation: shake .45s steps(6); }
+@keyframes flash { 0% { opacity: .4; } 100% { opacity: 0; } }
+@keyframes shake { 0%, 100% { transform: none; } 20% { transform: translate(-6px, 3px); } 40% { transform: translate(5px, -4px); } 60% { transform: translate(-3px, 2px); } 80% { transform: translate(2px, -1px); } }
+@media (prefers-reduced-motion: reduce) { .screen.boom { animation: none; } }
+.spawn {
+  position: absolute; left: 0; top: 0; width: 60px; height: 60px; transform: translate(-50%, -50%); pointer-events: none;
+  --c: var(--phos);
+  background:
+    linear-gradient(var(--c), var(--c)) left top / 10px 2px no-repeat, linear-gradient(var(--c), var(--c)) left top / 2px 10px no-repeat,
+    linear-gradient(var(--c), var(--c)) right top / 10px 2px no-repeat, linear-gradient(var(--c), var(--c)) right top / 2px 10px no-repeat,
+    linear-gradient(var(--c), var(--c)) left bottom / 10px 2px no-repeat, linear-gradient(var(--c), var(--c)) left bottom / 2px 10px no-repeat,
+    linear-gradient(var(--c), var(--c)) right bottom / 10px 2px no-repeat, linear-gradient(var(--c), var(--c)) right bottom / 2px 10px no-repeat,
+    linear-gradient(var(--c), var(--c)) center / 4px 4px no-repeat;
+}
+.state {
+  position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+  font-size: 15px; letter-spacing: .08em; color: var(--hot); text-transform: lowercase;
+}
+.state span { padding: 8px 14px; border: 1px solid var(--phos); background: rgba(4, 9, 6, .55); transition: opacity .3s; }
+.screen.playing:not(.paused) .state span { opacity: 0; }
+.boot {
+  position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; color: var(--dim);
+  pointer-events: none; transition: opacity .4s;
+}
+.boot.gone { opacity: 0; }
+.scope figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; font-size: 12px; color: var(--dim); }
+.scope figcaption b { color: var(--phos); font-weight: 500; }
+
+/* ls + git log */
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 48px; }
+.col { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.col h2 { margin: 0; font: 500 13px/1.6 var(--mono); color: var(--dim); }
+.col h2 b { color: var(--phos); font-weight: 500; }
+.list { list-style: none; margin: 0; padding: 0; border-top: 1px dashed var(--faint); }
+.list > li { border-bottom: 1px dashed var(--faint); }
+.list summary {
+  list-style: none; cursor: pointer; padding: 10px 6px; margin: 0 -6px;
+  display: grid; gap: 2px 14px; align-items: baseline; min-height: 44px; box-sizing: border-box;
+}
+.list summary::-webkit-details-marker { display: none; }
+.ls summary { grid-template-columns: 11ch 7ch minmax(0, 1fr); }
+.log summary { grid-template-columns: 7ch minmax(0, 1fr) auto; }
+.list summary:hover, .list summary:focus-visible, .list details[open] > summary { background: var(--phos); color: var(--bg); text-shadow: none; }
+.list summary:hover .muted, .list details[open] > summary .muted { color: var(--bg); opacity: .7; }
+.muted { color: var(--dim); }
+.ref { color: var(--amber); text-shadow: none; }
+.list summary:hover .ref, .list details[open] > summary .ref { color: var(--bg); }
+.nm { font-weight: 600; }
+.desc { grid-column: 3; font-size: 12.5px; }
+.log .desc { grid-column: 2 / span 2; }
+.body { padding: 10px 0 16px calc(18ch + 28px); display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.log .body { padding-left: 7ch; }
+.body ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.body li::before { content: "+ "; color: var(--dim); }
+.stack { color: var(--dim); }
+.ls .more { display: flex; gap: 14px; padding: 10px 0; }
+
+/* live prompt */
+.term { border: 1px solid var(--faint); background: var(--panel); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.out { max-height: 260px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--thumb) var(--track); display: flex; flex-direction: column; gap: 2px; font-size: 13px; overflow-wrap: anywhere; }
+.out .echo { color: var(--dim); }
+.out .err { color: var(--amber); text-shadow: none; }
+.cli { display: flex; gap: 10px; align-items: center; font-size: 13px; }
+.cli label { color: var(--dim); white-space: nowrap; }
+.cli input {
+  flex: 1; min-width: 0; font: inherit; color: var(--hot); background: transparent; border: 0;
+  padding: 8px 0; caret-color: var(--phos); text-shadow: var(--glow);
+}
+.cli input:focus { outline: none; }
+.term:focus-within { border-color: var(--dim); }
+
+footer { border-top: 1px solid var(--faint); }
+.foot {
+  max-width: 1120px; margin: 0 auto; padding-block: 18px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; font-size: 13px;
+}
+.foot nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.foot nav a { padding: 6px 0; }
+.foot .muted { font-size: 12px; }
+.copy { color: var(--dim); border: 1px solid var(--faint); padding: 2px 8px; margin-left: 8px; }
+.copy:hover { color: var(--phos); border-color: var(--phos); }
+
+/* crt overlay */
+.crt-fx { position: fixed; inset: 0; pointer-events: none; z-index: 20; display: none; }
+html.crt .crt-fx {
+  display: block;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.16) 2px 3px),
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 62%, rgba(0,0,0,.42) 100%);
+  animation: flicker 6s steps(1) infinite;
+}
+@keyframes flicker { 0%, 100% { opacity: 1; } 47% { opacity: .9; } 48% { opacity: 1; } 81% { opacity: .94; } }
+
+/* custom cursor */
+.cursor { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; display: none; }
+html.own-cursor, html.own-cursor * { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='22' viewBox='0 0 12 22' shape-rendering='crispEdges'%3E%3Cg fill='%234fe394'%3E%3Crect x='0' y='0' width='2' height='2'/%3E%3Crect x='0' y='2' width='2' height='2'/%3E%3Crect x='2' y='2' width='2' height='2'/%3E%3Crect x='0' y='4' width='2' height='2'/%3E%3Crect x='4' y='4' width='2' height='2'/%3E%3Crect x='0' y='6' width='2' height='2'/%3E%3Crect x='6' y='6' width='2' height='2'/%3E%3Crect x='0' y='8' width='2' height='2'/%3E%3Crect x='8' y='8' width='2' height='2'/%3E%3Crect x='0' y='10' width='2' height='2'/%3E%3Crect x='10' y='10' width='2' height='2'/%3E%3Crect x='0' y='12' width='2' height='2'/%3E%3Crect x='6' y='12' width='2' height='2'/%3E%3Crect x='8' y='12' width='2' height='2'/%3E%3Crect x='10' y='12' width='2' height='2'/%3E%3Crect x='0' y='14' width='2' height='2'/%3E%3Crect x='4' y='14' width='2' height='2'/%3E%3Crect x='8' y='14' width='2' height='2'/%3E%3Crect x='0' y='16' width='2' height='2'/%3E%3Crect x='2' y='16' width='2' height='2'/%3E%3Crect x='6' y='16' width='2' height='2'/%3E%3Crect x='10' y='16' width='2' height='2'/%3E%3Crect x='6' y='18' width='2' height='2'/%3E%3Crect x='10' y='18' width='2' height='2'/%3E%3Crect x='8' y='20' width='2' height='2'/%3E%3C/g%3E%3C/svg%3E") 1 1, auto !important; }
+html.own-cursor.down, html.own-cursor.down * { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='22' viewBox='0 0 12 22' shape-rendering='crispEdges'%3E%3Cg fill='%234fe394'%3E%3Crect x='0' y='0' width='2' height='2'/%3E%3Crect x='0' y='2' width='2' height='2'/%3E%3Crect x='2' y='2' width='2' height='2'/%3E%3Crect x='0' y='4' width='2' height='2'/%3E%3Crect x='2' y='4' width='2' height='2'/%3E%3Crect x='4' y='4' width='2' height='2'/%3E%3Crect x='0' y='6' width='2' height='2'/%3E%3Crect x='2' y='6' width='2' height='2'/%3E%3Crect x='4' y='6' width='2' height='2'/%3E%3Crect x='6' y='6' width='2' height='2'/%3E%3Crect x='0' y='8' width='2' height='2'/%3E%3Crect x='2' y='8' width='2' height='2'/%3E%3Crect x='4' y='8' width='2' height='2'/%3E%3Crect x='6' y='8' width='2' height='2'/%3E%3Crect x='8' y='8' width='2' height='2'/%3E%3Crect x='0' y='10' width='2' height='2'/%3E%3Crect x='2' y='10' width='2' height='2'/%3E%3Crect x='4' y='10' width='2' height='2'/%3E%3Crect x='6' y='10' width='2' height='2'/%3E%3Crect x='8' y='10' width='2' height='2'/%3E%3Crect x='10' y='10' width='2' height='2'/%3E%3Crect x='0' y='12' width='2' height='2'/%3E%3Crect x='2' y='12' width='2' height='2'/%3E%3Crect x='4' y='12' width='2' height='2'/%3E%3Crect x='6' y='12' width='2' height='2'/%3E%3Crect x='8' y='12' width='2' height='2'/%3E%3Crect x='10' y='12' width='2' height='2'/%3E%3Crect x='0' y='14' width='2' height='2'/%3E%3Crect x='2' y='14' width='2' height='2'/%3E%3Crect x='4' y='14' width='2' height='2'/%3E%3Crect x='6' y='14' width='2' height='2'/%3E%3Crect x='8' y='14' width='2' height='2'/%3E%3Crect x='0' y='16' width='2' height='2'/%3E%3Crect x='2' y='16' width='2' height='2'/%3E%3Crect x='6' y='16' width='2' height='2'/%3E%3Crect x='8' y='16' width='2' height='2'/%3E%3Crect x='10' y='16' width='2' height='2'/%3E%3Crect x='6' y='18' width='2' height='2'/%3E%3Crect x='8' y='18' width='2' height='2'/%3E%3Crect x='10' y='18' width='2' height='2'/%3E%3Crect x='8' y='20' width='2' height='2'/%3E%3C/g%3E%3C/svg%3E") 1 1, auto !important; }
+html.own-cursor input, html.own-cursor textarea, html.own-cursor.down input, html.own-cursor.down textarea { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20' viewBox='0 0 10 20' shape-rendering='crispEdges'%3E%3Cg fill='%234fe394'%3E%3Crect x='0' y='0' width='2' height='2'/%3E%3Crect x='2' y='0' width='2' height='2'/%3E%3Crect x='6' y='0' width='2' height='2'/%3E%3Crect x='8' y='0' width='2' height='2'/%3E%3Crect x='4' y='2' width='2' height='2'/%3E%3Crect x='4' y='4' width='2' height='2'/%3E%3Crect x='4' y='6' width='2' height='2'/%3E%3Crect x='4' y='8' width='2' height='2'/%3E%3Crect x='4' y='10' width='2' height='2'/%3E%3Crect x='4' y='12' width='2' height='2'/%3E%3Crect x='4' y='14' width='2' height='2'/%3E%3Crect x='4' y='16' width='2' height='2'/%3E%3Crect x='0' y='18' width='2' height='2'/%3E%3Crect x='2' y='18' width='2' height='2'/%3E%3Crect x='6' y='18' width='2' height='2'/%3E%3Crect x='8' y='18' width='2' height='2'/%3E%3C/g%3E%3C/svg%3E") 5 10, text !important; }
+.cursor i { position: absolute; display: block; left: -4px; top: -4px; width: 8px; height: 8px; border: 1px solid var(--phos); box-sizing: border-box; transition: width .12s, height .12s, left .12s, top .12s, border-color .12s; }
+.cursor.ui i { left: -7px; top: -7px; width: 14px; height: 14px; border-color: var(--hot); }
+.glyphs { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 29; }
+
+@media (max-width: 760px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .screen { aspect-ratio: 1 / 1; }
+  .ls summary { grid-template-columns: 7ch minmax(0, 1fr); }
+  .ls .perm { display: none; }
+  .desc, .log .desc { grid-column: 1 / -1; }
+  .body, .log .body { padding-left: 0; }
+  .bar .hide-s { display: none; }
+  .zhou-note { left: 0; top: calc(100% + 8px); transform: translateY(-4px); }
+  .row2:has(.han:hover) .zhou-note, .row2:has(.han:focus-visible) .zhou-note { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tag::after, .dot, html.crt .crt-fx { animation: none; }
+}
+</style>
+
+</head>
+<body>
+<div class="crt-fx" aria-hidden="true"></div>
+
+<header class="bar">
+  <div class="bar-in">
+    <span><span class="win">0:zsh</span>&nbsp; matthewzhou.ca</span>
+    <span class="bar-r">
+      <span class="hide-s">ottawa · montréal</span>
+      <span class="tnum" id="clock">--:--:-- ET</span>
+      <button id="crt" type="button" aria-pressed="true">crt: on</button>
+    </span>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero" aria-label="Who I am">
+    <div class="id">
+      <p class="prompt">matthew@zhou:~$ <b>whoami</b></p>
+      <h1 class="name">
+        <span data-scramble>MATTHEW</span>
+        <span class="row2"><span data-scramble>ZHOU</span><button class="han" type="button" lang="zh" aria-describedby="zhou-note">周全</button><span class="zhou-note" id="zhou-note" role="tooltip">周全 zhōu quán: thorough. 周 is a circuit. 全 means whole, complete.</span></span>
+      </h1>
+      <p class="tag">i like building</p>
+    </div>
+    <dl class="facts">
+      <dt>study</dt><dd>software engineering · mcgill</dd>
+      <dt>now</dt><dd>driverless perception · mcgill formula sae</dd>
+      <dt>last</dt><dd>reliability engineer intern · ciena · s26</dd>
+      <dt>stack</dt><dd>python · c++ · ros 2 · react · three.js</dd>
+      <dt>status</dt><dd class="open"><span class="dot" aria-hidden="true"></span>open to a summer ’27 co-op: software &amp; ai infrastructure</dd>
+    </dl>
+  </section>
+
+  <figure class="scope" id="scope">
+    <div class="modes">
+      <div class="seg" role="group" aria-label="Who steers the dragon">
+        <button type="button" id="m-play" aria-pressed="true">play</button>
+        <button type="button" id="m-idle" aria-pressed="false">idle</button>
+      </div>
+      <span id="m-note">play · dragon follows your cursor</span>
+    </div>
+    <div class="screen" id="screen">
+      <canvas id="gl" aria-label="Mini game: a green phosphor dragon chases your cursor and collects stars" role="img"></canvas>
+      <div class="grat" aria-hidden="true"></div>
+      <i class="corner c-tl" aria-hidden="true"></i><i class="corner c-tr" aria-hidden="true"></i>
+      <i class="corner c-bl" aria-hidden="true"></i><i class="corner c-br" aria-hidden="true"></i>
+      <div class="ro ro-tl" aria-hidden="true">CH1 <span class="k">·</span> dragon.glb<br><span class="k">tris</span> <span id="tris">—</span> <span class="k">fps</span> <span id="fps">--</span></div>
+      <div class="ro ro-tr"><span class="k">score</span> <span class="score" id="score">000</span><br><span class="k">your best</span> <span id="best">000</span><br><span class="k">★ all time</span> <span class="glob" id="global">—</span></div>
+      <div class="ro ro-bl" aria-hidden="true"><span class="k">x</span> <span id="cx">+0.000</span> <span class="k">y</span> <span id="cy">+0.000</span><br><span class="k">target</span> <span id="target">cursor</span></div>
+      <div class="ro ro-br" aria-hidden="true" id="hint">click to play</div>
+      <div class="state" aria-live="polite"><span id="state">click to play</span></div>
+      <div class="boot" id="boot">loading dragon.glb</div>
+    </div>
+    <figcaption><span>fig. 1 · <b>click to play or pause. eat the stars, dodge the bombs.</b></span><span>every star anyone collects counts toward ★ all time</span></figcaption>
+  </figure>
+
+  <section class="cols">
+    <div class="col">
+      <h2>matthew@zhou:~$ <b>ls -l projects/</b></h2>
+      <ul class="list ls">
+        <li><details>
+          <summary data-target="nodality.ai"><span class="perm muted">drwxr-xr-x</span><span class="muted">2025→</span><span class="nm" data-scramble>nodality.ai</span><span class="desc">ai mind-mapping that clusters your ideas and suggests the next one</span></summary>
+          <div class="body">
+            <span class="stack">react flow · node · python · postgresql · docker</span>
+            <a href="https://github.com/matthewzhouzq">github ↗</a>
+          </div>
+        </details></li>
+        <li><details>
+          <summary data-target="navigator.ai"><span class="perm muted">drwxr-xr-x</span><span class="muted">2023–24</span><span class="nm" data-scramble>navigator.ai</span><span class="desc">traffic routing for ottawa, built on 7 years of city data</span></summary>
+          <div class="body">
+            <ul><li>featured by the ottawa citizen and ctv</li></ul>
+            <span class="stack">javascript · three.js · leaflet · python · openai</span>
+            <a href="https://github.com/matthewzhouzq">github ↗</a>
+          </div>
+        </details></li>
+        <li><details>
+          <summary data-target="tempora"><span class="perm muted">drwxr-xr-x</span><span class="muted">2021–22</span><span class="nm" data-scramble>tempora</span><span class="desc">a productivity chrome extension</span></summary>
+          <div class="body">
+            <ul><li>reached 40+ users</li></ul>
+            <span class="stack">javascript · chrome api · python</span>
+            <a href="https://github.com/matthewzhouzq">github ↗</a>
+          </div>
+        </details></li>
+        <li class="more"><span class="muted">…</span><a href="https://github.com/matthewzhouzq">everything else on github ↗</a></li>
+      </ul>
+    </div>
+
+    <div class="col">
+      <h2>matthew@zhou:~$ <b>git log --oneline work</b></h2>
+      <ul class="list log">
+        <li><details>
+          <summary data-target="ciena"><span class="muted">c1e9a07</span><span><span class="ref">(tag: s26)</span> <span class="nm" data-scramble>ciena</span></span><span class="muted">may–aug 2026</span><span class="desc">reliability engineer intern</span></summary>
+          <div class="body"><ul>
+            <li>etl pipeline normalizing fit data from 5 card-type workbooks into a chromadb vector database, so 500+ test records match by meaning</li>
+            <li>extended a hybrid-rag fmeca prepopulation tool with a parallel fit vector layer</li>
+            <li>automated sir coupon resistance measurements: hioki ir meter + 41-channel relay controller, driven from python</li>
+            <li>tested capacitors and resoldered pcbs in the hardware lab</li>
+          </ul><span class="stack">python · vba · chromadb · rag</span></div>
+        </details></li>
+        <li><details>
+          <summary data-target="formula sae"><span class="muted">7fa2d31</span><span><span class="ref">(HEAD → now)</span> <span class="nm" data-scramble>mcgill formula sae</span></span><span class="muted">sep 2025→</span><span class="desc">driverless / autonomous</span></summary>
+          <div class="body"><ul>
+            <li>training a yolov8 model for live cone detection across lighting conditions</li>
+            <li>ros 2 nodes for high-frequency sensor data</li>
+          </ul><span class="stack">c++ · ros 2 · python · docker</span></div>
+        </details></li>
+        <li><details>
+          <summary data-target="ytp ottawa"><span class="muted">3b80c4e</span><span class="nm" data-scramble>youth tutoring project</span><span class="muted">2024–25</span><span class="desc">design lead</span></summary>
+          <div class="body"><ul>
+            <li>automated google sheets with python on google cloud</li>
+            <li>outreach posts and videos, 3d graphics in blender</li>
+          </ul></div>
+        </details></li>
+        <li><details>
+          <summary data-target="vex 50226A"><span class="muted">a91d5f2</span><span class="nm" data-scramble>vex 50226a</span><span class="muted">2023–25</span><span class="desc">software lead / mechanical</span></summary>
+          <div class="body"><ul>
+            <li>autonomous and driver-control code in c++ around hardware limits</li>
+            <li>built, then programmed, the pneumatics</li>
+          </ul></div>
+        </details></li>
+        <li><details>
+          <summary data-target="first 8729"><span class="muted">5e2c0b8</span><span class="nm" data-scramble>first robotics 8729</span><span class="muted">2023–25</span><span class="desc">software team lead</span></summary>
+          <div class="body"><ul>
+            <li>taught 19 members command-based robot programming in java</li>
+            <li>swerve autonomous paths on bézier trajectories, vision on a raspberry pi 4, pid tuning</li>
+          </ul></div>
+        </details></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="term" aria-label="Terminal">
+    <div class="out" id="out" aria-live="polite">
+      <div class="echo">last login: <span id="login">today</span> on ttys001</div>
+      <div>type <b>help</b> to look around, or <b>play</b> to start the game.</div>
+    </div>
+    <form class="cli" id="cli" autocomplete="off">
+      <label for="cmd">matthew@zhou:~$</label>
+      <input id="cmd" name="cmd" type="text" spellcheck="false" autocapitalize="off" aria-label="Type a command">
+    </form>
+  </section>
+</main>
+
+<footer>
+  <div class="foot">
+    <nav aria-label="Elsewhere">
+      <a href="https://github.com/matthewzhouzq">github</a>
+      <a href="https://www.linkedin.com/in/matthewzhouzq/">linkedin</a>
+      <a href="/matthewzhou_cv.pdf">résumé.pdf</a>
+    </nav>
+    <span>matthewzhou.contacts@gmail.com<button class="copy" id="copy" type="button">copy</button></span>
+  </div>
+</footer>
+
+<canvas class="glyphs" id="glyphs" aria-hidden="true"></canvas>
+
+<script>
+// page chrome that doesn't need three.js: clock, crt toggle, scramble, cursor, terminal
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+
+  // clock (Ottawa / Montréal time)
+  const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  const tick = () => { $('#clock').textContent = fmt.format(new Date()) + ' ET'; };
+  tick(); setInterval(tick, 1000);
+  $('#login').textContent = new Intl.DateTimeFormat('en-CA', { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date()).toLowerCase();
+
+  // crt toggle
+  const crtBtn = $('#crt');
+  let crt = true;
+  try { crt = localStorage.getItem('crt') !== 'off'; } catch (e) {}
+  const setCrt = (v) => {
+    crt = v; root.classList.toggle('crt', v);
+    crtBtn.setAttribute('aria-pressed', String(v)); crtBtn.textContent = v ? 'crt: on' : 'crt: off';
+    try { localStorage.setItem('crt', v ? 'on' : 'off'); } catch (e) {}
+    window.dispatchEvent(new CustomEvent('crt', { detail: v }));
+  };
+  setCrt(crt);
+  crtBtn.addEventListener('click', () => setCrt(!crt));
+  window.__crt = () => crt;
+
+  // text scramble on hover
+  const GL = '!<>-_/[]{}=+*^?#01';
+  const scramble = (el) => {
+    if (el._busy || reduce) return;
+    const final = el.dataset.text ?? (el.dataset.text = el.textContent);
+    el._busy = true;
+    let f = 0;
+    const id = setInterval(() => {
+      f++;
+      const done = Math.floor(f / 2);
+      el.textContent = [...final].map((c, i) => (i < done || c === ' ' ? c : GL[(Math.random() * GL.length) | 0])).join('');
+      if (done >= final.length) { clearInterval(id); el.textContent = final; el._busy = false; }
+    }, 28);
+  };
+  document.querySelectorAll('[data-scramble]').forEach((el) => {
+    const host = el.closest('summary') || el;
+    host.addEventListener('mouseenter', () => scramble(el));
+  });
+
+  // hovering a project or commit renames the scope's target
+  document.querySelectorAll('summary[data-target]').forEach((s) => {
+    s.addEventListener('mouseenter', () => { $('#target').textContent = s.dataset.target; });
+    s.addEventListener('mouseleave', () => { $('#target').textContent = window.__targetLabel || 'cursor'; });
+  });
+
+  // copy email
+  $('#copy').addEventListener('click', async () => {
+    const b = $('#copy');
+    try { await navigator.clipboard.writeText('matthewzhou.contacts@gmail.com'); b.textContent = 'copied'; }
+    catch (e) { const r = document.createRange(); r.selectNodeContents(b.parentNode.firstChild); getSelection().removeAllRanges(); getSelection().addRange(r); b.textContent = 'selected'; }
+    setTimeout(() => { b.textContent = 'copy'; }, 1600);
+  });
+
+  // cursor: the normal arrow in green (fills in while pressed), I-beam over text fields, with a fading green trail
+  if (matchMedia('(pointer: fine)').matches) {
+    root.classList.add('own-cursor');
+    const gc = $('#glyphs'), g = gc.getContext('2d');
+    const size = () => { const d = Math.min(2, devicePixelRatio || 1); gc.width = innerWidth * d; gc.height = innerHeight * d; g.setTransform(d, 0, 0, d, 0, 0); };
+    size(); addEventListener('resize', size);
+    // pressed: the arrow fills in green
+    addEventListener('pointerdown', () => root.classList.add('down'));
+    addEventListener('pointerup', () => root.classList.remove('down'));
+    addEventListener('blur', () => root.classList.remove('down'));
+    // trail: random characters shed as the cursor moves, fading mint → green → deep green
+    const LIFE = 0.9;
+    let gx = -999, gy = -999;
+    const parts = [];
+    addEventListener('pointermove', (e) => {
+      if (reduce) return;
+      const dx = e.clientX - gx, dy = e.clientY - gy;
+      if (dx * dx + dy * dy < 200) return;
+      gx = e.clientX; gy = e.clientY;
+      parts.push({ x: e.clientX, y: e.clientY, c: '01<>/{}#$*+;'[(Math.random() * 12) | 0], t: 0 });
+      if (parts.length > 60) parts.shift();
+    });
+    const stops = [[230, 255, 240], [79, 227, 148], [31, 107, 64]];
+    const col = (k) => {
+      const seg = k < 0.5 ? 0 : 1, f = k < 0.5 ? k / 0.5 : (k - 0.5) / 0.5;
+      return stops[seg].map((v, i) => Math.round(v + (stops[seg + 1][i] - v) * f));
+    };
+    let last = performance.now();
+    const draw = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      g.clearRect(0, 0, innerWidth, innerHeight);
+      g.font = '12px "IBM Plex Mono", monospace';
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const q = parts[i];
+        q.t += dt; q.y += 16 * dt;
+        const k = q.t / LIFE;
+        if (k >= 1) { parts.splice(i, 1); continue; }
+        const [r, gg, bb] = col(k);
+        g.fillStyle = `rgba(${r},${gg},${bb},${(1 - k * k).toFixed(3)})`;
+        g.fillText(q.c, q.x + 12, q.y + 20);
+      }
+      requestAnimationFrame(draw);
+    };
+    requestAnimationFrame(draw);
+  }
+
+  // terminal
+  const out = $('#out'), input = $('#cmd');
+  const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const print = (html, cls) => { const d = document.createElement('div'); if (cls) d.className = cls; d.innerHTML = html; out.append(d); out.scrollTop = out.scrollHeight; };
+  const LINKS = {
+    'nodality.ai': 'https://github.com/matthewzhouzq', 'navigator.ai': 'https://github.com/matthewzhouzq', tempora: 'https://github.com/matthewzhouzq',
+    github: 'https://github.com/matthewzhouzq', linkedin: 'https://www.linkedin.com/in/matthewzhouzq/', resume: '/matthewzhou_cv.pdf',
+  };
+  const C = {
+    help: () => print('about&nbsp; <b>whoami</b> · <b>ls</b> · <b>log</b> · <b>open</b> &lt;name&gt; · <b>contact</b> · <b>resume</b> · <b>zhou</b><br>game&nbsp;&nbsp; <b>play</b> · <b>idle</b> · <b>pause</b> · <b>score</b> · <b>stars</b><br>misc&nbsp;&nbsp; <b>crt</b> · <b>clear</b> · <b>history</b>'),
+    play: () => { window.__game && window.__game.driver('user'); C.summon(); },
+    idle: () => { const g = window.__game; if (!g) return print('the game is still loading.'); g.driver('ai'); g.play(); print('idle mode: the dragon plays itself.'); },
+    pause: () => { const g = window.__game; if (g) g.pause(); print('paused. click the screen or type <b>play</b> to resume.'); },
+    score: () => { const g = window.__game; print(g ? 'score ' + g.score() + ' · best ' + g.best() : 'the game is still loading.'); },
+    stars: () => { const g = window.__game, n = g && g.total(); print(n == null ? 'the shared counter isn&#39;t reachable from here.' : n.toLocaleString('en-CA') + ' stars collected by everyone so far.'); },
+    history: () => print(hist.length ? hist.map((h, i) => (i + 1) + '&nbsp; ' + esc(h)).join('<br>') : 'nothing yet.'),
+    whoami: () => print('matthew zhou (周全). software engineering at mcgill. i like building.'),
+    ls: () => print('nodality.ai/&nbsp;&nbsp; navigator.ai/&nbsp;&nbsp; tempora/&nbsp;&nbsp; <span class="muted">(open &lt;name&gt; for the code)</span>'),
+    log: () => print('c1e9a07 ciena · 7fa2d31 formula sae · 3b80c4e ytp · a91d5f2 vex · 5e2c0b8 first 8729'),
+    contact: () => print('email&nbsp; matthewzhou.contacts@gmail.com<br>github <a href="' + LINKS.github + '">matthewzhouzq ↗</a> · linkedin <a href="' + LINKS.linkedin + '">in/matthewzhouzq ↗</a>'),
+    resume: () => print('<a href="' + LINKS.resume + '">résumé.pdf ↗</a>'),
+    open: (arg) => {
+      const k = Object.keys(LINKS).find((n) => n.startsWith((arg || '').toLowerCase()) && arg);
+      if (!k) return print('open: tell me what to open. try <b>open nodality</b>', 'err');
+      print('<a href="' + LINKS[k] + '">' + esc(k) + ' ↗</a>');
+    },
+    zhou: () => print('周全 zhōu quán: thorough. 周 = a circuit. 全 = whole, complete.'),
+    summon: () => { window.dispatchEvent(new Event('summon')); $('#screen').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); print('the dragon heard you. go collect some stars.'); },
+    crt: () => crtBtn.click(),
+    clear: () => { out.innerHTML = ''; },
+    sudo: (arg) => (/summon|dragon/.test(arg || '') ? C.summon() : print('nice try.', 'err')),
+  };
+  C['周'] = C.zhou; C['周全'] = C.zhou; C.quan = C.zhou; C.cv = C.resume; C.dragon = C.summon;
+  const hist = []; let hi = 0;
+  $('#cli').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const raw = input.value.trim(); input.value = '';
+    if (!raw) return;
+    hist.push(raw); hi = hist.length;
+    print('$ ' + esc(raw), 'echo');
+    const [name, ...rest] = raw.split(/\s+/);
+    const fn = C[name.toLowerCase()];
+    if (fn) fn(rest.join(' ')); else print('command not found: ' + esc(name) + '. try <b>help</b>', 'err');
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' && hi > 0) { hi--; input.value = hist[hi]; e.preventDefault(); }
+    if (e.key === 'ArrowDown') { hi = Math.min(hist.length, hi + 1); input.value = hist[hi] || ''; e.preventDefault(); }
+  });
+})();
+</script>
+<script type="module" src="/src/main.js"></script>
+</body>
 </html>
