@@ -31,6 +31,10 @@ img { max-width: 100%; }
   --amber: #f2c46d;
   --track: #0b1f14;
   --thumb: #2c6a48;
+  --barbg: #5fbf88;
+  --grid: rgba(141, 245, 181, 0.035);
+  --heart: #ff5d73;
+  --grid-glitch: rgba(141, 245, 181, 0.08);
   --display: 'Doto', 'IBM Plex Mono', ui-monospace, monospace;
   --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --han: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
@@ -60,12 +64,12 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* status bar */
 .bar {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
-  background: var(--phos); color: var(--bg); text-shadow: none;
+  background: var(--barbg); color: var(--bg); text-shadow: none;
   font-size: 12px; padding-block: 3px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--phos); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--barbg); }
 .bar-in { max-width: 1120px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 4px 18px; justify-content: space-between; align-items: center; }
 .bar-in span, .bar-in button { white-space: nowrap; }
 .bar .win { background: var(--bg); color: var(--phos); padding: 0 6px; }
@@ -153,6 +157,30 @@ html.crt .screen canvas { image-rendering: pixelated; }
 .ro .score { font-size: 24px; line-height: 1.1; font-weight: 600; color: var(--hot); display: inline-block; transition: transform .15s; }
 .ro .score.bump { transform: scale(1.25); }
 .ro .glob { color: var(--phos); }
+.ro .streak { display: inline-block; color: var(--hot); font-weight: 600; transition: transform .15s; }
+.ro .streak.bump { transform: scale(1.5); }
+.ro .streak.zero { color: var(--dim); font-weight: 400; }
+.pop-txt {
+  position: absolute; left: 0; top: 0; pointer-events: none; text-align: center; white-space: nowrap;
+  font: 500 13px/1.2 var(--mono); color: var(--phos); text-shadow: 0 0 10px rgba(141, 245, 181, .8);
+  animation: rise 1.2s ease-out forwards;
+}
+.pop-txt b { display: block; font-size: calc(18px + var(--s, 1) * 3px); font-weight: 600; color: var(--hot); }
+@keyframes rise {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(.7); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+  100% { opacity: 0; transform: translate(-50%, -170%) scale(1); }
+}
+.screen.streakfx { animation: glow .55s ease-out; }
+@keyframes glow { 0% { box-shadow: inset 0 0 0 2px var(--hot), inset 0 0 60px rgba(141, 245, 181, .45); } 100% { box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 transparent; } }
+.screen.paused .pop-txt { filter: blur(7px); opacity: .6; }
+.lives { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 7px; min-height: 12px; font-size: 13px; color: var(--heart); text-shadow: none; }
+.lives i { display: block; width: 14px; height: 12px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='12' viewBox='0 0 14 12' shape-rendering='crispEdges'%3E%3Cg fill='%23ff5d73'%3E%3Crect x='2' y='0' width='2' height='2'/%3E%3Crect x='4' y='0' width='2' height='2'/%3E%3Crect x='8' y='0' width='2' height='2'/%3E%3Crect x='10' y='0' width='2' height='2'/%3E%3Crect x='0' y='2' width='2' height='2'/%3E%3Crect x='2' y='2' width='2' height='2'/%3E%3Crect x='4' y='2' width='2' height='2'/%3E%3Crect x='6' y='2' width='2' height='2'/%3E%3Crect x='8' y='2' width='2' height='2'/%3E%3Crect x='10' y='2' width='2' height='2'/%3E%3Crect x='12' y='2' width='2' height='2'/%3E%3Crect x='0' y='4' width='2' height='2'/%3E%3Crect x='2' y='4' width='2' height='2'/%3E%3Crect x='4' y='4' width='2' height='2'/%3E%3Crect x='6' y='4' width='2' height='2'/%3E%3Crect x='8' y='4' width='2' height='2'/%3E%3Crect x='10' y='4' width='2' height='2'/%3E%3Crect x='12' y='4' width='2' height='2'/%3E%3Crect x='2' y='6' width='2' height='2'/%3E%3Crect x='4' y='6' width='2' height='2'/%3E%3Crect x='6' y='6' width='2' height='2'/%3E%3Crect x='8' y='6' width='2' height='2'/%3E%3Crect x='10' y='6' width='2' height='2'/%3E%3Crect x='4' y='8' width='2' height='2'/%3E%3Crect x='6' y='8' width='2' height='2'/%3E%3Crect x='8' y='8' width='2' height='2'/%3E%3Crect x='6' y='10' width='2' height='2'/%3E%3C/g%3E%3C/svg%3E") center / 14px 12px no-repeat; filter: drop-shadow(0 0 4px rgba(255, 93, 115, .6)); }
+.lives i.new { animation: heart-in .6s ease-out; }
+@keyframes heart-in { 0% { transform: scale(0); } 55% { transform: scale(1.8); } 100% { transform: scale(1); } }
+.lives.hit { animation: heart-hit .5s steps(2) 2; }
+@keyframes heart-hit { 50% { opacity: .2; } }
+.pop-txt.life b { color: var(--heart); }
 .ro-tr { top: 12px; right: 34px; text-align: right; }
 .ro-bl { bottom: 12px; left: 34px; }
 .ro-br { bottom: 12px; right: 34px; text-align: right; color: var(--dim); }
@@ -254,6 +282,30 @@ footer { border-top: 1px solid var(--faint); }
 .copy { color: var(--dim); border: 1px solid var(--faint); padding: 2px 8px; margin-left: 8px; }
 .copy:hover { color: var(--phos); border-color: var(--phos); }
 
+/* background: a very faint grid, with thin slices that now and then slip sideways */
+.bg-grid {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+.bg-grid::before, .bg-grid::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: linear-gradient(var(--grid-glitch) 1px, transparent 1px), linear-gradient(90deg, var(--grid-glitch) 1px, transparent 1px);
+  background-size: 56px 56px; clip-path: inset(100% 0 0 0);
+}
+.bg-grid::before { background-position: 9px 0; animation: slip-a 7.3s steps(1) infinite; }
+.bg-grid::after { background-position: -14px 3px; animation: slip-b 11.7s steps(1) infinite; }
+@keyframes slip-a {
+  0% { clip-path: inset(18% 0 80.5% 0); } 3% { clip-path: inset(100% 0 0 0); }
+  37% { clip-path: inset(52% 0 46% 0); } 39% { clip-path: inset(53% 0 44.5% 0); } 41% { clip-path: inset(100% 0 0 0); }
+  71% { clip-path: inset(84% 0 15% 0); } 73% { clip-path: inset(100% 0 0 0); }
+}
+@keyframes slip-b {
+  0% { clip-path: inset(100% 0 0 0); } 22% { clip-path: inset(33% 0 63% 0); } 24% { clip-path: inset(100% 0 0 0); }
+  58% { clip-path: inset(7% 0 92% 0); } 59% { clip-path: inset(66% 0 31% 0); } 61% { clip-path: inset(100% 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) { .bg-grid::before, .bg-grid::after { animation: none; } }
+
 /* crt overlay */
 .crt-fx { position: fixed; inset: 0; pointer-events: none; z-index: 20; display: none; }
 html.crt .crt-fx {
@@ -293,6 +345,7 @@ html.own-cursor input, html.own-cursor textarea, html.own-cursor.down input, htm
 
 </head>
 <body>
+<div class="bg-grid" aria-hidden="true"></div>
 <div class="crt-fx" aria-hidden="true"></div>
 
 <header class="bar">
@@ -339,13 +392,13 @@ html.own-cursor input, html.own-cursor textarea, html.own-cursor.down input, htm
       <i class="corner c-tl" aria-hidden="true"></i><i class="corner c-tr" aria-hidden="true"></i>
       <i class="corner c-bl" aria-hidden="true"></i><i class="corner c-br" aria-hidden="true"></i>
       <div class="ro ro-tl" aria-hidden="true">CH1 <span class="k">·</span> dragon.glb<br><span class="k">tris</span> <span id="tris">—</span> <span class="k">fps</span> <span id="fps">--</span></div>
-      <div class="ro ro-tr"><span class="k">score</span> <span class="score" id="score">000</span><br><span class="k">your best</span> <span id="best">000</span><br><span class="k">★ all time</span> <span class="glob" id="global">—</span></div>
+      <div class="ro ro-tr"><span class="k">score</span> <span class="score" id="score">000</span><br><span class="k">streak</span> <span class="streak zero" id="streak">×0</span><br><span class="k">your best</span> <span id="best">000</span><br><span class="k">highest streak</span> <span id="bestStreak">×0</span><br><span class="k">★ all time</span> <span class="glob" id="global">—</span><span class="lives" id="lives" role="img" aria-label="1 life"></span></div>
       <div class="ro ro-bl" aria-hidden="true"><span class="k">x</span> <span id="cx">+0.000</span> <span class="k">y</span> <span id="cy">+0.000</span><br><span class="k">target</span> <span id="target">cursor</span></div>
       <div class="ro ro-br" aria-hidden="true" id="hint">click to play</div>
       <div class="state" aria-live="polite"><span id="state">click to play</span></div>
       <div class="boot" id="boot">loading dragon.glb</div>
     </div>
-    <figcaption><span>fig. 1 · <b>click to play or pause. eat the stars, dodge the bombs.</b></span><span>every star anyone collects counts toward ★ all time</span></figcaption>
+    <figcaption><span>fig. 1 · <b>click to play/pause. collect stars, dodge bombs. clear field = streak. 25 streak &gt; +1 life</b></span><span>every star anyone collects counts toward ★ all time</span></figcaption>
   </figure>
 
   <section class="cols">
@@ -567,7 +620,7 @@ html.own-cursor input, html.own-cursor textarea, html.own-cursor.down input, htm
     play: () => { window.__game && window.__game.driver('user'); C.summon(); },
     idle: () => { const g = window.__game; if (!g) return print('the game is still loading.'); g.driver('ai'); g.play(); print('idle mode: the dragon plays itself.'); },
     pause: () => { const g = window.__game; if (g) g.pause(); print('paused. click the screen or type <b>play</b> to resume.'); },
-    score: () => { const g = window.__game; print(g ? 'score ' + g.score() + ' · best ' + g.best() : 'the game is still loading.'); },
+    score: () => { const g = window.__game; print(g ? 'score ' + g.score() + ' · streak ×' + g.streak() + ' · lives ' + g.lives() + ' · best ' + g.best() : 'the game is still loading.'); },
     stars: () => { const g = window.__game, n = g && g.total(); print(n == null ? 'the shared counter isn&#39;t reachable from here.' : n.toLocaleString('en-CA') + ' stars collected by everyone so far.'); },
     history: () => print(hist.length ? hist.map((h, i) => (i + 1) + '&nbsp; ' + esc(h)).join('<br>') : 'nothing yet.'),
     whoami: () => print('matthew zhou (周全). software engineering at mcgill. i like building.'),

@@ -98,9 +98,13 @@ const trail = []; // past head positions, oldest first
 const STEP = 0.12;
 let wave = 0, speed = 8, idleA = 0;
 const stars = [];
-let spawnT = 0, score = 0, best = 0;
+let spawnT = 0, score = 0, best = 0, streak = 0;
+let lives = 1, invuln = 0, runT = 0; // lives: start with 1, +1 every 25 streak; runT: seconds into this run (bombs ramp up)
 try { best = Number(localStorage.getItem('dragon-best')) || 0; } catch (e) {}
 $('#best').textContent = pad(best);
+let bestStreak = 0;
+try { bestStreak = Number(localStorage.getItem('dragon-best-streak')) || 0; } catch (e) {}
+$('#bestStreak').textContent = '×' + bestStreak;
 
 const tmp = {
   T: new THREE.Vector3(), up: new THREE.Vector3(), side: new THREE.Vector3(), P: new THREE.Vector3(),
@@ -341,6 +345,7 @@ function updateStars(dt, t, snout) {
   spawnT += dt;
   const live = stars.filter((s) => s.state !== 'pop').length;
   if (live < cap && spawnT > (mode === 'play' ? 1.1 : 0.6)) { spawnT = 0; spawnStar(); }
+  if (streak && stars.filter((s) => s.state === 'idle' || s.state === 'in').length >= cap) setStreak(0); // fell behind: the field filled up
   for (let i = stars.length - 1; i >= 0; i--) {
     const s = stars[i], m = s.m;
     m.rotation.y += dt * 1.8;
@@ -368,7 +373,7 @@ function updateStars(dt, t, snout) {
     if (mode === 'play' && snout && (s.state === 'idle' || s.state === 'in')) {
       const dx = m.position.x - snout.x, dy = m.position.y - snout.y;
       if (dx * dx + dy * dy < (STAR * 1.5 + 0.9) ** 2 || head.distanceTo(m.position) < STAR * 1.5 + 0.9) {
-        s.state = 'pop'; s.t = 0; collect();
+        s.state = 'pop'; s.t = 0; collect(s);
       }
     }
   }
@@ -434,16 +439,45 @@ function explode(pos, small) {
 function updateBits(dt) {
   for (let i = bits.length - 1; i >= 0; i--) {
     const p = bits[i];
-    p.life -= dt; p.v.y -= 16 * dt;
+    p.life -= dt; p.v.y -= (p.grav ?? 16) * dt;
     p.m.position.addScaledVector(p.v, dt);
     p.m.rotation.x += dt * 9; p.m.rotation.y += dt * 7;
     p.m.scale.multiplyScalar(Math.exp(-dt * 1.6));
     if (p.life <= 0) { scene.remove(p.m); bits.splice(i, 1); }
   }
 }
+function renderLives(fresh) {
+  const el = $('#lives');
+  const shown = Math.min(lives, 6);
+  el.innerHTML = '<i></i>'.repeat(shown) + (lives > 6 ? '<span>+' + (lives - 6) + '</span>' : '');
+  if (fresh && shown) el.children[shown - 1].classList.add('new');
+  el.setAttribute('aria-label', lives + (lives === 1 ? ' life' : ' lives'));
+}
+function newRun() { lives = 1; invuln = 0; runT = 0; renderLives(); }
+function loseLife() {
+  lives = Math.max(0, lives - 1);
+  setStreak(0);
+  renderLives();
+  const el = $('#lives'); el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
+  if (lives > 0) { invuln = 1.6; return; } // keep going; the dragon blinks while it can't be hit
+  if (driver === 'ai') aiReset(); else gameOver();
+}
+function gainLife(pos) {
+  lives++;
+  renderLives(true);
+  const [x, y] = toScreen(pos);
+  const el = document.createElement('div');
+  el.className = 'pop-txt life';
+  el.setAttribute('aria-hidden', 'true');
+  el.style.left = x + 'px'; el.style.top = (y - 46) + 'px';
+  el.innerHTML = '<b>+1 life</b>';
+  screen.insertBefore(el, $('#state').parentNode);
+  setTimeout(() => el.remove(), 1300);
+}
 function aiReset() {
+  newRun();
   clearBombs();
-  score = 0; scoreEl.textContent = pad(0);
+  score = 0; scoreEl.textContent = pad(0); setStreak(0);
   head.set(0, 0, 0);
   const a = Math.random() * Math.PI * 2; dir.set(Math.cos(a), Math.sin(a), 0);
   resetTrail();
@@ -485,7 +519,9 @@ function updateStun(t) {
 function updateBombs(dt, t, snout) {
   if (mode === 'play') {
     bombT += dt;
-    if (bombs.length < 2 && bombT > 3.4) { bombT = Math.random() * 1.4; spawnBomb(); }
+    const maxBombs = Math.min(5, 2 + Math.floor(runT / 35)); // one more allowed every ~35 s, up to 5
+    const gap = Math.max(1.6, 3.4 - runT * 0.02); // and they come a little more often
+    if (bombs.length < maxBombs && bombT > gap) { bombT = Math.random() * 1.2; spawnBomb(); }
   } else if (mode !== 'pause' && bombs.length) clearBombs();
   for (let i = bombs.length - 1; i >= 0; i--) {
     const b = bombs[i], g = b.g;
@@ -514,14 +550,13 @@ function updateBombs(dt, t, snout) {
       g.scale.setScalar(S * Math.max(0.0001, 1 - b.t));
       if (b.t >= 1) { removeBomb(i); continue; }
     }
-    if (mode === 'play' && snout && b.state !== 'out') {
+    if (mode === 'play' && snout && b.state !== 'out' && invuln <= 0) {
       const r = S * 1.1 + 0.6;
       if (snout.distanceTo(g.position) < r || head.distanceTo(g.position) < r) {
         const pos = g.position.clone();
         removeBomb(i);
         explode(pos);
-        if (driver === 'ai') { aiReset(); return; }
-        gameOver();
+        loseLife();
         return;
       }
     }
@@ -530,8 +565,66 @@ function updateBombs(dt, t, snout) {
 
 // ── score + the shared counter ─────────────────────────
 const scoreEl = $('#score');
-function collect() {
-  score++;
+// field clear: the star you just ate was the only one out. Bonus points, the next star appears at once, streak +1.
+function toScreen(v) {
+  const r = screen.getBoundingClientRect();
+  return [(v.x / W + 0.5) * r.width, (0.5 - v.y / H) * r.height];
+}
+function setStreak(n, up) {
+  streak = n;
+  const el = $('#streak');
+  el.textContent = '×' + n;
+  el.classList.toggle('zero', n === 0);
+  if (up) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); setTimeout(() => el.classList.remove('bump'), 180); }
+  if (up && driver === 'user' && n > bestStreak) { // the AI's streaks don't count
+    bestStreak = n;
+    $('#bestStreak').textContent = '×' + n;
+    try { localStorage.setItem('dragon-best-streak', String(n)); } catch (e) {}
+  }
+}
+function clearFx(pos, n, bonus) {
+  // a ring of little stars bursting outward, a pulse on the frame, and a floating callout
+  const ring = 10 + Math.min(n, 8) * 2;
+  for (let i = 0; i < ring; i++) {
+    const a = (i / ring) * Math.PI * 2, sp = 9 + Math.min(n, 8) * 1.2;
+    const m = new THREE.Mesh(starGeo, starMat);
+    m.position.copy(pos); m.frustumCulled = false;
+    m.scale.setScalar(STAR * 0.35);
+    scene.add(m);
+    bits.push({ m, v: new THREE.Vector3(Math.cos(a) * sp, Math.sin(a) * sp, 0), life: 0.55, grav: 0 });
+  }
+  screen.classList.remove('streakfx'); void screen.offsetWidth; screen.classList.add('streakfx');
+  const [x, y] = toScreen(pos);
+  const el = document.createElement('div');
+  el.className = 'pop-txt';
+  el.setAttribute('aria-hidden', 'true');
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  el.style.setProperty('--s', String(Math.min(n, 8)));
+  el.innerHTML = 'clear +' + bonus + '<b>×' + n + '</b>';
+  screen.insertBefore(el, $('#state').parentNode);
+  setTimeout(() => el.remove(), 1300);
+}
+function fastSpawn() {
+  // the next star skips its countdown: finish one that's on its way, or make a new one right now
+  spawnT = 0;
+  const waiting = stars.find((o) => o.state === 'warn');
+  if (waiting) { waiting.t = 1; return; }
+  const n = stars.length;
+  spawnStar();
+  if (stars.length > n) stars[stars.length - 1].t = 1;
+}
+function collect(s) {
+  const alone = !stars.some((o) => o !== s && (o.state === 'idle' || o.state === 'in'));
+  let pts = 1;
+  if (alone) {
+    const bonus = Math.min(streak + 1, 10);
+    setStreak(streak + 1, true);
+    pts += bonus;
+    clearFx(s.m.position.clone(), streak, bonus);
+    if (streak % 25 === 0) gainLife(s.m.position.clone());
+    fastSpawn();
+  }
+  score += pts;
   scoreEl.textContent = pad(score);
   scoreEl.classList.remove('bump'); void scoreEl.offsetWidth; scoreEl.classList.add('bump');
   setTimeout(() => scoreEl.classList.remove('bump'), 160);
@@ -579,9 +672,11 @@ function setMode(m) {
   screen.classList.toggle('paused', m === 'pause');
   stateEl.textContent = m === 'pause' ? 'paused · click to resume' : m === 'over' ? 'gg u ded · click to play again' : 'click to play';
   hint.textContent = m === 'play' ? 'click to pause' : m === 'pause' ? 'click to resume' : m === 'over' ? 'click to play again' : 'click to play';
-  if (m === 'play' && (was === 'attract' || was === 'over')) { score = 0; scoreEl.textContent = pad(0); bombT = 0; }
+  if (m === 'play' && (was === 'attract' || was === 'over')) { score = 0; scoreEl.textContent = pad(0); bombT = 0; setStreak(0); newRun(); }
+  if (m === 'over') setStreak(0);
 }
 const toggle = () => setMode(mode === 'play' ? 'pause' : 'play');
+renderLives();
 function setDriver(d) {
   if (d === driver) return;
   driver = d;
@@ -591,12 +686,12 @@ function setDriver(d) {
   window.__targetLabel = d === 'ai' ? 'nearest star' : 'cursor';
   $('#target').textContent = window.__targetLabel;
   chasing = false;
-  score = 0; scoreEl.textContent = pad(0); // a new run for whoever is steering now
+  score = 0; scoreEl.textContent = pad(0); setStreak(0); newRun(); // a new run for whoever is steering now
   if (d === 'ai' && (mode === 'attract' || mode === 'over')) setMode('play');
 }
 $('#m-play').addEventListener('click', () => setDriver('user'));
 $('#m-idle').addEventListener('click', () => setDriver('ai'));
-window.__game = { driver: (d) => setDriver(d), play: () => mode !== 'play' && setMode('play'), pause: () => mode === 'play' && setMode('pause'), score: () => score, best: () => best, total: () => shared.total() };
+window.__game = { driver: (d) => setDriver(d), play: () => mode !== 'play' && setMode('play'), pause: () => mode === 'play' && setMode('pause'), score: () => score, streak: () => streak, lives: () => lives, best: () => best, total: () => shared.total() };
 
 const fmtN = (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(3);
 function aimAt(cx, cy) {
@@ -685,6 +780,9 @@ function loop() {
     }
     updateStun(t);
     updateStars(dt, t, snout);
+    if (mode === 'play') runT += dt;
+    if (invuln > 0) invuln -= dt;
+    group.visible = invuln > 0 ? Math.floor(t * 14) % 2 === 0 : true;
     updateBombs(dt, t, snout);
     updateBits(dt);
   }
