@@ -345,7 +345,7 @@ function updateStars(dt, t, snout) {
   spawnT += dt;
   const live = stars.filter((s) => s.state !== 'pop').length;
   if (live < cap && spawnT > (mode === 'play' ? 1.1 : 0.6)) { spawnT = 0; spawnStar(); }
-  if (streak && stars.filter((s) => s.state === 'idle' || s.state === 'in').length >= cap) setStreak(0); // fell behind: the field filled up
+  if (streak && stars.filter((s) => s.state === 'idle' || s.state === 'in').length >= 2) setStreak(0); // missed one: two stars out at once
   for (let i = stars.length - 1; i >= 0; i--) {
     const s = stars[i], m = s.m;
     m.rotation.y += dt * 1.8;
